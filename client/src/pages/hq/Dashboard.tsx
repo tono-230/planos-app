@@ -2,7 +2,7 @@ import { useScans } from "@/hooks/use-scans";
 import { useAnalysis } from "@/hooks/use-analysis";
 import { usePlans } from "@/hooks/use-plans";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CheckCircle2, AlertCircle, MapPin, Store } from "lucide-react";
+import { Activity, CheckCircle2, AlertCircle, MapPin, Store, XCircle, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
@@ -28,9 +28,16 @@ export default function Dashboard() {
   const totalPlanned = plans?.length || 0;
   
   const correctCount = analysis?.filter(a => a.status === 'correct').length || 0;
-  const errorCount = analysis?.filter(a => a.status !== 'correct').length || 0;
+  const mismatchCount = analysis?.filter(a => a.status === 'mismatch').length || 0;
+  const missingCount = analysis?.filter(a => a.status === 'missing').length || 0;
   
-  const accuracyRate = totalScans > 0 ? Math.round((correctCount / totalScans) * 100) : 0;
+  // Total items expected across all scanned blocks
+  const totalItems = analysis?.length || 0;
+  const accuracyRate = totalItems > 0 ? Math.round((correctCount / totalItems) * 100) : null;
+
+  // For this mock, we assume each scan record is from a unique store or just count total scans as "store data points"
+  // In a real app, we'd count unique store IDs
+  const storeCount = totalScans;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -40,59 +47,67 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 1. スキャン店舗 */}
         <Card className="border-none shadow-md shadow-black/5 overflow-hidden relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">店舗スキャン状況</CardTitle>
-            <Activity className={`h-5 w-5 ${totalScans > 0 ? 'text-emerald-500' : 'text-amber-500'}`} />
+            <CardTitle className="text-sm font-medium text-muted-foreground">スキャン店舗</CardTitle>
+            <Store className={`h-5 w-5 ${storeCount > 0 ? 'text-emerald-500' : 'text-amber-500'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display">{totalScans > 0 ? '受信済み' : '待機中'}</div>
+            <div className="text-3xl font-bold font-display">{storeCount > 0 ? `${storeCount} 店舗` : '待機中'}</div>
             <p className="text-sm text-muted-foreground mt-1">
-              {totalScans > 0 ? `${totalScans} 件のデータを取得` : 'データ未取得'}
+              {storeCount > 0 ? 'データ受信済み' : 'データ未取得'}
             </p>
           </CardContent>
         </Card>
 
+        {/* 2. 棚割遵守率 */}
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">棚割実行率</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">棚割遵守率</CardTitle>
             <CheckCircle2 className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display">{accuracyRate}%</div>
-            <div className="w-full bg-secondary h-2 rounded-full mt-3 overflow-hidden">
-              <div 
-                className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" 
-                style={{ width: `${accuracyRate}%` }} 
-              />
+            <div className="text-3xl font-bold font-display">
+              {accuracyRate !== null ? `${accuracyRate}%` : 'データ未取得'}
             </div>
+            {accuracyRate !== null && (
+              <div className="w-full bg-secondary h-2 rounded-full mt-3 overflow-hidden">
+                <div 
+                  className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" 
+                  style={{ width: `${accuracyRate}%` }} 
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* 3. 誤配置SKU */}
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">実行中プラン</CardTitle>
-            <MapPin className="h-5 w-5 text-blue-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">誤配置SKU</CardTitle>
+            <AlertTriangle className={`h-5 w-5 ${mismatchCount > 0 ? 'text-amber-500' : 'text-muted-foreground'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display">{totalPlanned}</div>
+            <div className="text-3xl font-bold font-display">{mismatchCount}</div>
             <p className="text-sm text-muted-foreground mt-1">
-              売場に割り当て済み
+              別ブロックでの検出
             </p>
           </CardContent>
         </Card>
 
+        {/* 4. 未展開SKU */}
         <Card className="border-none shadow-md shadow-black/5 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-destructive/10 rounded-bl-full -z-10" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">棚割差異</CardTitle>
-            <AlertCircle className={`h-5 w-5 ${errorCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+            <CardTitle className="text-sm font-medium text-muted-foreground">未展開SKU</CardTitle>
+            <XCircle className={`h-5 w-5 ${missingCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display text-foreground">{errorCount}</div>
+            <div className="text-3xl font-bold font-display text-foreground">{missingCount}</div>
             <p className="text-sm text-muted-foreground mt-1">
-              店舗確認が必要
+              売場未検出
             </p>
           </CardContent>
         </Card>
@@ -127,12 +142,12 @@ export default function Dashboard() {
                   </Button>
                 </div>
               </div>
-            ) : errorCount > 0 ? (
+            ) : (mismatchCount > 0 || missingCount > 0) ? (
               <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/5 flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-destructive">不一致の確認</h4>
-                  <p className="text-sm text-muted-foreground mt-1 mb-3">解析の結果、計画と実際の陳列の間に {errorCount} 件の差異が検出されました。</p>
+                  <p className="text-sm text-muted-foreground mt-1 mb-3">解析の結果、計画と実際の陳列の間に差異が検出されました。詳細を確認して店舗へ指示を出してください。</p>
                   <Button asChild size="sm" variant="destructive">
                     <Link href="/hq/analysis">分析結果を表示</Link>
                   </Button>
