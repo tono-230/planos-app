@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse } from "lucide-react";
+import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse, Info } from "lucide-react";
 
-// Mock data generation for eyewear RFID scans
+// Mock data generation for eyewear RFID scans with planogram comparison
 const generateMockScans = () => {
   const brands = ["AIR Slim", "SUN Classic", "GB Metal", "JD Bold", "ES Basic", "KM Light"];
   const fixtures = ["入口テーブル", "中央島什器A", "中央島什器B", "壁面A", "壁面B", "レジ横"];
@@ -17,13 +17,28 @@ const generateMockScans = () => {
     const status = statuses[Math.floor(Math.random() * statuses.length)];
     const fixture = status === "売場に展開" ? fixtures[Math.floor(Math.random() * fixtures.length)] : "-";
     
+    // Planogram comparison logic (mock)
+    const plannedFixture = fixtures[Math.floor(Math.random() * fixtures.length)];
+    const plannedBlock = brand.split(' ')[0]; // Use brand prefix as block name
+    
+    let comparison = "不明";
+    if (status === "売場に展開") {
+      comparison = fixture === plannedFixture ? "計画通り" : "誤配置";
+    } else if (status === "バックヤード") {
+      comparison = "未展開";
+    } else if (status === "不明ロケーション") {
+      comparison = "不明";
+    }
+
     return {
       id: i + 1,
       epc: `3034E4390${Math.random().toString(16).slice(2, 10).toUpperCase()}`,
       sku: `EYE-${1000 + i}`,
       name: `${brand} ${["01", "02", "03"][Math.floor(Math.random() * 3)]}`,
       fixture: fixture,
-      status: status
+      status: status,
+      plannedBlock: plannedBlock,
+      comparison: comparison
     };
   });
 };
@@ -53,6 +68,22 @@ export default function ScanSubmission() {
         description: "RFIDスキャン結果を本部へ送信しました。",
       });
     }, 1500);
+  };
+
+  const getComparisonBadge = (comparison: string) => {
+    switch (comparison) {
+      case "計画通り":
+        return <Badge className="bg-emerald-500 hover:bg-emerald-600 gap-1">計画通り</Badge>;
+      case "未展開":
+        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-500/20 gap-1">未展開</Badge>;
+      case "誤配置":
+        return <Badge className="bg-orange-500 hover:bg-orange-600 gap-1">誤配置</Badge>;
+      case "バックヤード":
+        return <Badge variant="secondary" className="gap-1">バックヤード</Badge>;
+      case "不明":
+      default:
+        return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600 gap-1">不明</Badge>;
+    }
   };
 
   return (
@@ -136,46 +167,48 @@ export default function ScanSubmission() {
 
       <Card className="border-border/50 shadow-xl shadow-black/5 overflow-hidden">
         <CardHeader className="bg-secondary/30 border-b border-border/40">
-          <CardTitle>スキャン結果詳細</CardTitle>
-          <CardDescription>検出された全てのRFIDタグ情報（最新30件）</CardDescription>
+          <CardTitle>スキャン結果詳細（棚割比較）</CardTitle>
+          <CardDescription>検出された全てのRFIDタグ情報と本部計画との照合結果</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-secondary/10">
-                  <TableHead className="w-[200px] font-bold">EPC</TableHead>
-                  <TableHead className="font-bold">SKU</TableHead>
+                  <TableHead className="w-[180px] font-bold">EPC</TableHead>
                   <TableHead className="font-bold">商品名</TableHead>
+                  <TableHead className="font-bold text-primary">計画ブロック</TableHead>
                   <TableHead className="font-bold">検出什器</TableHead>
                   <TableHead className="font-bold">状態</TableHead>
+                  <TableHead className="font-bold text-primary">計画との差分</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {scanData.map((scan) => (
                   <TableRow key={scan.id} className="hover:bg-secondary/5 transition-colors">
-                    <TableCell className="font-mono text-xs text-muted-foreground">{scan.epc}</TableCell>
-                    <TableCell className="font-medium">{scan.sku}</TableCell>
-                    <TableCell>{scan.name}</TableCell>
+                    <TableCell className="font-mono text-[10px] text-muted-foreground">{scan.epc}</TableCell>
                     <TableCell>
-                      <span className="flex items-center gap-1.5">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{scan.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{scan.sku}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-bold border-primary/20 text-primary">
+                        {scan.plannedBlock}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-1.5 text-xs">
                         {scan.fixture !== "-" && <MapPin className="h-3 w-3 text-primary" />}
                         {scan.fixture}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant={
-                          scan.status === "売場に展開" ? "default" : 
-                          scan.status === "バックヤード" ? "secondary" : "outline"
-                        }
-                        className={
-                          scan.status === "売場に展開" ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-500/20" :
-                          scan.status === "不明ロケーション" ? "text-amber-600 border-amber-500/20" : ""
-                        }
-                      >
-                        {scan.status}
-                      </Badge>
+                      <span className="text-xs text-muted-foreground">{scan.status}</span>
+                    </TableCell>
+                    <TableCell>
+                      {getComparisonBadge(scan.comparison)}
                     </TableCell>
                   </TableRow>
                 ))}
