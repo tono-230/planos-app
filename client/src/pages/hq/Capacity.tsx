@@ -4,9 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { 
   BarChart3, 
-  TrendingDown, 
-  TrendingUp, 
-  MoveRight,
   AlertCircle, 
   CheckCircle2, 
   Package, 
@@ -18,12 +15,12 @@ import {
 
 const MOCK_OPTIMIZATION_DATA = [
   { sku: "EYE-2001", name: "AIR Slim 01", block: "AIR", status: "売場展開中", sales: "高", action: "展開継続" },
-  { sku: "EYE-2002", name: "SUN Classic 02", block: "SUN", status: "バックヤード", sales: "低", action: "削減候補" },
+  { sku: "EYE-2002", name: "SUN Classic 02", block: "SUN", status: "未展開", sales: "低", action: "削減候補" },
   { sku: "EYE-2003", name: "GB Metal 01", block: "GB", status: "売場展開中", sales: "中", action: "展開継続" },
   { sku: "EYE-2004", name: "JD Bold 03", block: "JD", status: "誤配置", sales: "中", action: "要確認" },
   { sku: "EYE-2005", name: "ES Basic 02", block: "ES", status: "未展開", sales: "高", action: "入替候補" },
   { sku: "EYE-2006", name: "KM Light 01", block: "KM", status: "売場展開中", sales: "低", action: "入替候補" },
-  { sku: "EYE-2007", name: "AIR Slim 02", block: "AIR", status: "バックヤード", sales: "低", action: "削減候補" },
+  { sku: "EYE-2007", name: "AIR Slim 02", block: "AIR", status: "未展開", sales: "低", action: "削減候補" },
   { sku: "EYE-2008", name: "SUN Classic 01", block: "SUN", status: "売場展開中", sales: "高", action: "展開継続" },
 ];
 
@@ -52,7 +49,7 @@ export default function CapacityManagement() {
     }
   };
 
-  const getSalesIcon = (sales: string) => {
+  const getSalesLabel = (sales: string) => {
     switch (sales) {
       case "高":
         return <div className="flex items-center text-emerald-600 font-bold">↑ 高</div>;
@@ -78,9 +75,7 @@ export default function CapacityManagement() {
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-6">
         <Card className="border-none shadow-md shadow-black/5 bg-secondary/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
-              <Package className="h-3 w-3" /> 総SKU数
-            </CardTitle>
+            <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">総SKU数</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-lg font-black">{stats.totalSkus.toLocaleString()}</div>
@@ -88,9 +83,7 @@ export default function CapacityManagement() {
         </Card>
         <Card className="border-none shadow-md shadow-black/5 bg-primary/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
-              <LayoutGrid className="h-3 w-3" /> 売場キャパ数
-            </CardTitle>
+            <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">売場キャパ数</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-lg font-black">{stats.capacity.toLocaleString()}</div>
@@ -98,9 +91,7 @@ export default function CapacityManagement() {
         </Card>
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1 text-emerald-600">
-              <CheckCircle2 className="h-3 w-3" /> 展開予定SKU数
-            </CardTitle>
+            <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-emerald-600">展開予定SKU数</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-lg font-black">{stats.planned.toLocaleString()}</div>
@@ -108,9 +99,7 @@ export default function CapacityManagement() {
         </Card>
         <Card className="border-none shadow-md shadow-black/5 bg-emerald-50/50 dark:bg-emerald-950/10">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
-              <PlusCircle className="h-3 w-3" /> キャパ残
-            </CardTitle>
+            <CardTitle className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">キャパ残</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-lg font-black text-emerald-700">{stats.remaining.toLocaleString()}</div>
@@ -118,22 +107,18 @@ export default function CapacityManagement() {
         </Card>
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1 text-orange-600">
-              <MinusCircle className="h-3 w-3" /> 未展開SKU数
-            </CardTitle>
+            <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-orange-600">未展開SKU数</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-black">{stats.notInPlan.toLocaleString()}</div>
+            <div className="text-xl font-black">{stats.notInPlan.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md shadow-black/5 bg-rose-50 dark:bg-rose-950/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-bold text-rose-600 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" /> 要見直しSKU数
-            </CardTitle>
+            <CardTitle className="text-[10px] font-bold text-rose-600 uppercase tracking-wider">要見直しSKU数</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-black text-rose-600">{stats.needsReview}</div>
+            <div className="text-xl font-black text-rose-600">{stats.needsReview}</div>
           </CardContent>
         </Card>
       </div>
@@ -170,7 +155,7 @@ export default function CapacityManagement() {
                       <span className="text-sm">{item.status}</span>
                     </TableCell>
                     <TableCell>
-                      {getSalesIcon(item.sales)}
+                      {getSalesLabel(item.sales)}
                     </TableCell>
                     <TableCell>
                       {getActionBadge(item.action)}
