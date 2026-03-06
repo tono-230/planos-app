@@ -9,26 +9,22 @@ import { locations, products } from "@shared/schema";
 async function seedDatabase() {
   const existingLocs = await storage.getLocations();
   if (existingLocs.length === 0) {
-    await db.insert(locations).values([
-      { name: "Entrance Table" },
-      { name: "Wall A Upper" },
-      { name: "Wall A Middle" },
-      { name: "Wall B Feature" },
-      { name: "Cashier Side" }
-    ]);
+    const gridLocs = [];
+    const rows = ["A", "B", "C"];
+    for (const row of rows) {
+      for (let col = 1; col <= 4; col++) {
+        gridLocs.push({ name: `Block ${row}${col}` });
+      }
+    }
+    await db.insert(locations).values(gridLocs);
   }
 
   const existingProds = await storage.getProducts();
   if (existingProds.length === 0) {
-    await db.insert(products).values([
-      { name: "Classic White T-Shirt", productGroup: "T-Shirts" },
-      { name: "Graphic Print T-Shirt", productGroup: "T-Shirts" },
-      { name: "Blue Jeans Regular", productGroup: "Pants" },
-      { name: "Black Denim Jacket", productGroup: "Jackets" },
-      { name: "Summer Dress Floral", productGroup: "Dresses" },
-      { name: "Sneakers White", productGroup: "Shoes" },
-      { name: "Beanie Hat", productGroup: "Accessories" },
-    ]);
+    const brands = ["AIR", "SUN", "GB", "JD", "NICHE", "ES", "KM", "MOVE"];
+    await db.insert(products).values(
+      brands.map(brand => ({ name: brand, productGroup: brand }))
+    );
   }
 }
 

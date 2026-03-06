@@ -3,10 +3,27 @@ import { useLocations } from "@/hooks/use-locations";
 import { useProducts } from "@/hooks/use-products";
 import { usePlans, useCreatePlan, useDeletePlan } from "@/hooks/use-plans";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Package, Plus, Trash2, Layers } from "lucide-react";
+import { LayoutGrid, Plus, Trash2, Check } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+const BRAND_COLORS: Record<string, string> = {
+  AIR: "bg-blue-500",
+  SUN: "bg-orange-500",
+  GB: "bg-emerald-500",
+  JD: "bg-indigo-500",
+  NICHE: "bg-purple-500",
+  ES: "bg-rose-500",
+  KM: "bg-slate-700",
+  MOVE: "bg-cyan-600",
+};
 
 export default function PlanManager() {
   const { toast } = useToast();
@@ -17,156 +34,140 @@ export default function PlanManager() {
   const createPlan = useCreatePlan();
   const deletePlan = useDeletePlan();
 
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
-  const [selectedProduct, setSelectedProduct] = useState<string>("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeLocationId, setActiveLocationId] = useState<number | null>(null);
 
-  const handleAddPlan = () => {
-    if (!selectedLocation || !selectedProduct) {
-      toast({ title: "入力不備", description: "ロケーションと商品の両方を選択してください。", variant: "destructive" });
-      return;
+  const handleAssignBrand = (productId: number) => {
+    if (!activeLocationId) return;
+
+    // Remove existing plan for this location if any
+    const existingPlan = plans?.find(p => p.locationId === activeLocationId);
+    if (existingPlan) {
+      deletePlan.mutate(existingPlan.id);
     }
 
     createPlan.mutate({
-      locationId: parseInt(selectedLocation),
-      productId: parseInt(selectedProduct),
+      locationId: activeLocationId,
+      productId: productId,
     }, {
       onSuccess: () => {
-        toast({ title: "完了", description: "計画が正常に登録されました。" });
-        setSelectedProduct("");
+        toast({ title: "更新完了", description: "ブランドを割り当てました。" });
+        setIsDialogOpen(false);
       }
     });
   };
 
-  const isFormLoading = loadingLocs || loadingProds || loadingPlans;
+  const handleClearLocation = (locationId: number) => {
+    const existingPlan = plans?.find(p => p.locationId === locationId);
+    if (existingPlan) {
+      deletePlan.mutate(existingPlan.id, {
+        onSuccess: () => {
+          toast({ title: "解除完了", description: "割り当てを解除しました。" });
+        }
+      });
+    }
+  };
+
+  const isLoading = loadingLocs || loadingProds || loadingPlans;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">週間売場計画</h1>
-          <p className="mt-2 text-muted-foreground">商品グループを店舗の陳列場所に割り当てます。</p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">週間売場計画 (VMDボード)</h1>
+        <p className="mt-2 text-muted-foreground">店舗の陳列ブロックをクリックしてブランドを割り当てます。</p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Form Column */}
-        <div className="lg:col-span-1">
-          <Card className="border-none shadow-xl shadow-black/5 bg-gradient-to-b from-card to-secondary/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-primary to-accent" />
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Plus className="h-5 w-5 text-primary" />
-                陳列の割り当て
-              </CardTitle>
-              <CardDescription>店舗での実施ルールを新規作成します。</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" /> 
-                  ロケーションゾーン
-                </label>
-                <Select value={selectedLocation} onValueChange={setSelectedLocation} disabled={isFormLoading}>
-                  <SelectTrigger className="w-full bg-background border-border/50 focus:ring-primary/20">
-                    <SelectValue placeholder="ゾーンを選択..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations?.map((loc) => (
-                      <SelectItem key={loc.id} value={loc.id.toString()}>{loc.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      <Card className="border-border/50 shadow-xl shadow-black/5 overflow-hidden">
+        <CardHeader className="bg-secondary/30 border-b border-border/40 pb-4">
+          <CardTitle className="text-xl flex items-center gap-2">
+            <LayoutGrid className="h-5 w-5 text-primary" />
+            ストア・ディスプレイ・グリッド
+          </CardTitle>
+          <CardDescription>4列 × 3行 の陳列ユニット構成</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {locations?.slice(0, 12).map((loc) => {
+              const plan = plans?.find(p => p.locationId === loc.id);
+              const product = products?.find(p => p.id === plan?.productId);
+              const brandColor = product ? (BRAND_COLORS[product.name] || "bg-primary") : "bg-secondary/50";
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold flex items-center gap-2">
-                  <Package className="h-4 w-4 text-muted-foreground" />
-                  商品グループ
-                </label>
-                <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={isFormLoading}>
-                  <SelectTrigger className="w-full bg-background border-border/50 focus:ring-primary/20">
-                    <SelectValue placeholder="商品を選択..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products?.map((prod) => (
-                      <SelectItem key={prod.id} value={prod.id.toString()}>
-                        {prod.name} <span className="text-xs text-muted-foreground ml-2">({prod.productGroup})</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button 
-                onClick={handleAddPlan} 
-                disabled={isFormLoading || createPlan.isPending || !selectedLocation || !selectedProduct}
-                className="w-full shadow-md shadow-primary/20 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11"
-              >
-                {createPlan.isPending ? "登録中..." : "計画に追加"}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* List Column */}
-        <div className="lg:col-span-2">
-          <Card className="border-border/50 shadow-md shadow-black/5 min-h-[500px] flex flex-col">
-            <CardHeader className="border-b border-border/30 bg-secondary/30 pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Layers className="h-5 w-5 text-muted-foreground" />
-                現在の有効なマッピング
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0 flex-1">
-              {isFormLoading ? (
-                <div className="flex h-full min-h-[300px] items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : plans?.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8 text-muted-foreground">
-                  <MapPin className="h-12 w-12 text-border mb-4" />
-                  <p className="text-lg font-medium text-foreground">計画が設定されていません</p>
-                  <p className="text-sm mt-1">フォームを使用して商品をゾーンに割り当ててください。</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-border/40">
-                  {plans?.map((plan) => {
-                    const loc = locations?.find(l => l.id === plan.locationId);
-                    const prod = products?.find(p => p.id === plan.productId);
-                    return (
-                      <div key={plan.id} className="flex items-center justify-between p-4 hover:bg-secondary/20 transition-colors group">
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
-                            <MapPin className="h-5 w-5" />
+              return (
+                <div key={loc.id} className="relative group aspect-square">
+                  <Dialog open={isDialogOpen && activeLocationId === loc.id} onOpenChange={(open) => {
+                    setIsDialogOpen(open);
+                    if (open) setActiveLocationId(loc.id);
+                  }}>
+                    <DialogTrigger asChild>
+                      <button
+                        className={`w-full h-full rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 transition-all duration-200 hover:border-primary/50 hover:bg-secondary/30 overflow-hidden ${plan ? 'border-none' : ''}`}
+                      >
+                        {plan && product ? (
+                          <div className={`w-full h-full ${brandColor} text-white flex flex-col items-center justify-center p-4 relative animate-in zoom-in-95 duration-300`}>
+                            <span className="text-2xl font-black tracking-tighter">{product.name}</span>
+                            <span className="text-[10px] opacity-80 font-bold mt-1 uppercase tracking-widest">{loc.name}</span>
                           </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{loc?.name || "不明なゾーン"}</p>
-                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
-                              <Package className="h-3 w-3" />
-                              <span>{prod?.name || "不明な商品"}</span>
-                              <span className="px-1.5 py-0.5 rounded-md bg-border/50 text-[10px] uppercase font-bold tracking-wider ml-2">
-                                {prod?.productGroup}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => deletePlan.mutate(plan.id)}
-                          disabled={deletePlan.isPending}
-                          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        ) : (
+                          <>
+                            <Plus className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <span className="text-xs font-bold text-muted-foreground group-hover:text-primary transition-colors uppercase tracking-wider">{loc.name}</span>
+                          </>
+                        )}
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>{loc.name} へのブランド割り当て</DialogTitle>
+                      </DialogHeader>
+                      <div className="grid grid-cols-2 gap-3 py-4">
+                        {products?.map((prod) => (
+                          <Button
+                            key={prod.id}
+                            variant="outline"
+                            className={`h-16 flex flex-col items-center justify-center relative overflow-hidden group ${BRAND_COLORS[prod.name] || 'bg-primary'} text-white border-none hover:opacity-90`}
+                            onClick={() => handleAssignBrand(prod.id)}
+                          >
+                            <span className="text-lg font-black tracking-tighter">{prod.name}</span>
+                            {plans?.find(p => p.locationId === loc.id && p.productId === prod.id) && (
+                              <Check className="absolute top-1 right-1 h-4 w-4" />
+                            )}
+                          </Button>
+                        ))}
                       </div>
-                    );
-                  })}
+                      {plan && (
+                        <Button
+                          variant="destructive"
+                          className="w-full mt-2"
+                          onClick={() => {
+                            handleClearLocation(loc.id);
+                            setIsDialogOpen(false);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          割り当てをクリア
+                        </Button>
+                      )}
+                    </DialogContent>
+                  </Dialog>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <p className="text-sm text-muted-foreground italic">
+          ※ 各ブロックは売場の陳列ユニットを表しています。
+        </p>
       </div>
     </div>
   );
