@@ -1,5 +1,5 @@
 import { Link, useLocation, useParams } from "wouter";
-import { LayoutDashboard, Map, BarChart3, Store, ScanLine, LayoutGrid, Building2, FileBarChart2, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Map, BarChart3, Store, ScanLine, LayoutGrid, Building2, FileBarChart2, ChevronLeft, Layers } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +17,7 @@ const hqItems = [
   { title: "ダッシュボード", url: "/hq/dashboard", icon: LayoutDashboard },
   { title: "週間売場計画", url: "/hq/plan", icon: Map },
   { title: "店舗一覧", url: "/hq/stores", icon: Building2 },
+  { title: "SVキャパシティ管理", url: "/hq/sv-capacity", icon: Layers },
 ];
 
 const STORE_NAMES: Record<string, string> = {

@@ -12,6 +12,7 @@ import { Shell } from "./components/layout/Shell";
 import Dashboard from "./pages/hq/Dashboard";
 import PlanManager from "./pages/hq/Plan";
 import StoreList from "./pages/hq/StoreList";
+import SVCapacity from "./pages/hq/SVCapacity";
 
 // Store Pages
 import StoreSummary from "./pages/store/StoreSummary";
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/hq/dashboard" component={Dashboard} />
         <Route path="/hq/plan" component={PlanManager} />
         <Route path="/hq/stores" component={StoreList} />
+        <Route path="/hq/sv-capacity" component={SVCapacity} />
 
         {/* Store Routes (store-level, scoped by :id) */}
         <Route path="/store/:id/summary" component={StoreSummary} />
