@@ -6,12 +6,14 @@ import {
   BarChart3, 
   TrendingDown, 
   TrendingUp, 
+  MoveRight,
   AlertCircle, 
   CheckCircle2, 
   Package, 
   LayoutGrid,
   ArrowRightLeft,
-  MinusCircle
+  MinusCircle,
+  PlusCircle
 } from "lucide-react";
 
 const MOCK_OPTIMIZATION_DATA = [
@@ -30,7 +32,8 @@ export default function CapacityManagement() {
     totalSkus: 1542,
     capacity: 1000,
     planned: 985,
-    notDisplayed: 557,
+    get remaining() { return this.capacity - this.planned },
+    notInPlan: 557,
     needsReview: 42
   };
 
@@ -52,11 +55,11 @@ export default function CapacityManagement() {
   const getSalesIcon = (sales: string) => {
     switch (sales) {
       case "高":
-        return <div className="flex items-center text-emerald-600 font-bold"><TrendingUp className="h-4 w-4 mr-1" /> 高</div>;
+        return <div className="flex items-center text-emerald-600 font-bold"><TrendingUp className="h-4 w-4 mr-1" /> ↑ 高</div>;
       case "中":
-        return <div className="flex items-center text-blue-600 font-bold">中</div>;
+        return <div className="flex items-center text-blue-600 font-bold"><MoveRight className="h-4 w-4 mr-1" /> → 中</div>;
       case "低":
-        return <div className="flex items-center text-rose-600 font-bold"><TrendingDown className="h-4 w-4 mr-1" /> 低</div>;
+        return <div className="flex items-center text-rose-600 font-bold"><TrendingDown className="h-4 w-4 mr-1" /> ↓ 低</div>;
       default:
         return sales;
     }
@@ -72,55 +75,65 @@ export default function CapacityManagement() {
         <p className="mt-2 text-muted-foreground">商品数と陳列スペースの最適化を行い、効率的な売場構成を支援します。</p>
       </div>
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-6">
         <Card className="border-none shadow-md shadow-black/5 bg-secondary/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
               <Package className="h-3 w-3" /> 総SKU数
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-black">{stats.totalSkus.toLocaleString()}</div>
+            <div className="text-lg font-black">{stats.totalSkus.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md shadow-black/5 bg-primary/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1">
               <LayoutGrid className="h-3 w-3" /> 売場キャパ数
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-black">{stats.capacity.toLocaleString()}</div>
+            <div className="text-lg font-black">{stats.capacity.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-1 text-emerald-600">
+            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1 text-emerald-600">
               <CheckCircle2 className="h-3 w-3" /> 展開予定SKU数
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-black">{stats.planned.toLocaleString()}</div>
+            <div className="text-lg font-black">{stats.planned.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+        <Card className="border-none shadow-md shadow-black/5 bg-emerald-50/50 dark:bg-emerald-950/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+              <PlusCircle className="h-3 w-3" /> キャパ残
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg font-black text-emerald-700">{stats.remaining.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-muted-foreground flex items-center gap-1 text-orange-600">
+            <CardTitle className="text-[10px] font-bold text-muted-foreground flex items-center gap-1 text-orange-600">
               <MinusCircle className="h-3 w-3" /> 未展開SKU数
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-black">{stats.notDisplayed.toLocaleString()}</div>
+            <div className="text-lg font-black">{stats.notInPlan.toLocaleString()}</div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md shadow-black/5 bg-rose-50 dark:bg-rose-950/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-rose-600 flex items-center gap-1">
+            <CardTitle className="text-[10px] font-bold text-rose-600 flex items-center gap-1">
               <AlertCircle className="h-3 w-3" /> 要見直しSKU数
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl font-black text-rose-600">{stats.needsReview}</div>
+            <div className="text-lg font-black text-rose-600">{stats.needsReview}</div>
           </CardContent>
         </Card>
       </div>
