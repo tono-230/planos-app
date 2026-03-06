@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LayoutGrid, CheckCircle2, Circle } from "lucide-react";
+import { Link, useParams } from "wouter";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +11,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+const STORE_NAMES: Record<string, string> = {
+  "1": "渋谷店", "2": "新宿店", "3": "池袋店", "4": "横浜店",
+  "5": "川崎店", "6": "大宮店", "7": "千葉店", "8": "立川店",
+};
 
 const FIXTURES = [
   "入口テーブル",
@@ -50,6 +56,9 @@ const BRAND_COLORS: Record<string, string> = {
 };
 
 export default function StoreLayout() {
+  const params = useParams<{ id: string }>();
+  const storeId = params.id || "1";
+  const storeName = STORE_NAMES[storeId] || "店舗";
   const [assignments, setAssignments] = useState<Record<number, string>>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeFixtureIdx, setActiveFixtureIdx] = useState<number | null>(null);
@@ -73,6 +82,13 @@ export default function StoreLayout() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+          <Link href="/hq/stores" className="hover:text-foreground transition-colors">店舗一覧</Link>
+          <span>/</span>
+          <Link href={`/store/${storeId}/summary`} className="hover:text-foreground transition-colors">{storeName}</Link>
+          <span>/</span>
+          <span className="text-foreground font-medium">店舗レイアウト</span>
+        </div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">店舗レイアウト設定</h1>
         <p className="mt-2 text-muted-foreground">実際の什器に本部のマーチャンダイジングブロックを紐付けます。</p>
       </div>

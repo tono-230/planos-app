@@ -5,6 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse } from "lucide-react";
+import { Link, useParams } from "wouter";
+
+const STORE_NAMES: Record<string, string> = {
+  "1": "渋谷店", "2": "新宿店", "3": "池袋店", "4": "横浜店",
+  "5": "川崎店", "6": "大宮店", "7": "千葉店", "8": "立川店",
+};
 
 // Mock data generation for eyewear RFID scans with planogram comparison
 const generateMockScans = () => {
@@ -51,6 +57,9 @@ const generateMockScans = () => {
 };
 
 export default function ScanSubmission() {
+  const params = useParams<{ id: string }>();
+  const storeId = params.id || "1";
+  const storeName = STORE_NAMES[storeId] || "店舗";
   const { toast } = useToast();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,6 +105,13 @@ export default function ScanSubmission() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+            <Link href="/hq/stores" className="hover:text-foreground transition-colors">店舗一覧</Link>
+            <span>/</span>
+            <Link href={`/store/${storeId}/summary`} className="hover:text-foreground transition-colors">{storeName}</Link>
+            <span>/</span>
+            <span className="text-foreground font-medium">スキャン送信</span>
+          </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <ScanLine className="h-8 w-8 text-primary" />
             RFIDスキャン送信

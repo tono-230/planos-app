@@ -32,7 +32,6 @@ export default function Dashboard() {
   const mismatchCount = analysis?.filter(a => a.status === 'mismatch').length || 0;
   const missingCount = analysis?.filter(a => a.status === 'missing').length || 0;
 
-  // Fixed Mock values per user request
   const mockScannedStores = 420;
   const mockTotalStores = 500;
   const mockComplianceRate = 65;
@@ -51,7 +50,7 @@ export default function Dashboard() {
         {/* 1. スキャン店舗数 (Blue) */}
         <Card 
           className="border-none shadow-md shadow-black/5 overflow-hidden relative group cursor-pointer hover:bg-blue-500/[0.02] transition-colors"
-          onClick={() => setLocation("/store/scan")}
+          onClick={() => setLocation("/hq/stores")}
         >
           <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -74,7 +73,7 @@ export default function Dashboard() {
         {/* 2. 棚割遵守率 (Green) */}
         <Card 
           className="border-none shadow-md shadow-black/5 cursor-pointer hover:bg-emerald-500/[0.02] transition-colors"
-          onClick={() => setLocation("/hq/analysis")}
+          onClick={() => setLocation("/hq/stores")}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">棚割遵守率</CardTitle>
@@ -99,7 +98,7 @@ export default function Dashboard() {
         {/* 3. オーバーフロー率 (Orange) */}
         <Card 
           className="border-none shadow-md shadow-black/5 cursor-pointer hover:bg-orange-500/[0.02] transition-colors"
-          onClick={() => setLocation("/hq/capacity")}
+          onClick={() => setLocation("/hq/stores")}
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">オーバーフロー率</CardTitle>
@@ -136,8 +135,8 @@ export default function Dashboard() {
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">未スキャン店舗があります。RFIDスキャンデータを送信してください。</p>
                 <Button asChild size="sm" variant="outline" className="w-full justify-between">
-                  <Link href="/store/scan" className="flex items-center justify-between w-full">
-                    スキャン送信へ <ArrowRight className="h-4 w-4" />
+                  <Link href="/hq/stores" className="flex items-center justify-between w-full">
+                    店舗一覧へ <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardContent>
@@ -155,8 +154,8 @@ export default function Dashboard() {
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">一部SKUが売場キャパを超えています。SKU削減または売場再配置を検討してください。</p>
                 <Button asChild size="sm" variant="outline" className="w-full justify-between">
-                  <Link href="/hq/capacity" className="flex items-center justify-between w-full">
-                    キャパシティ管理へ <ArrowRight className="h-4 w-4" />
+                  <Link href="/hq/stores" className="flex items-center justify-between w-full">
+                    店舗一覧へ <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardContent>
@@ -174,8 +173,8 @@ export default function Dashboard() {
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">計画と異なる配置が検出されています。売場配置を確認してください。</p>
                 <Button asChild size="sm" variant="outline" className="w-full justify-between">
-                  <Link href="/hq/analysis" className="flex items-center justify-between w-full">
-                    分析結果を表示 <ArrowRight className="h-4 w-4" />
+                  <Link href="/hq/stores" className="flex items-center justify-between w-full">
+                    店舗一覧へ <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
               </CardContent>
