@@ -21,7 +21,10 @@ async function seedDatabase() {
 
   const existingProds = await storage.getProducts();
   if (existingProds.length === 0) {
-    const brands = ["AIR", "SUN", "GB", "JD", "NICHE", "ES", "KM", "MOVE"];
+    const brands = [
+      "AIR", "SUN", "GB", "JD", "ES", "KM", "NICHE", "MOVE", "JUNNI", "HP",
+      "The ONE", "BinB", "AIR PLA", "AIR METAL", "カラー レンズ", "店舗限定", "雑貨", "その他"
+    ];
     await db.insert(products).values(
       brands.map(brand => ({ name: brand, productGroup: brand }))
     );

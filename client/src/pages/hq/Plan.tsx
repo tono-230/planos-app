@@ -19,10 +19,20 @@ const BRAND_COLORS: Record<string, string> = {
   SUN: "bg-orange-500",
   GB: "bg-emerald-500",
   JD: "bg-indigo-500",
-  NICHE: "bg-purple-500",
   ES: "bg-rose-500",
   KM: "bg-slate-700",
+  NICHE: "bg-purple-500",
   MOVE: "bg-cyan-600",
+  JUNNI: "bg-amber-600",
+  HP: "bg-lime-600",
+  "The ONE": "bg-stone-500",
+  BinB: "bg-zinc-600",
+  "AIR PLA": "bg-sky-400",
+  "AIR METAL": "bg-gray-400",
+  "カラー レンズ": "bg-pink-400",
+  "店舗限定": "bg-red-600",
+  "雑貨": "bg-teal-500",
+  "その他": "bg-neutral-400",
 };
 
 export default function PlanManager() {
