@@ -29,7 +29,7 @@ const generateMockScans = () => {
         fixture = fixtures[Math.floor(Math.random() * fixtures.length)];
         comparison = fixture === plannedFixture ? "計画通り" : "誤配置";
       } else {
-        fixture = "不明";
+        fixture = "未特定";
         comparison = "要確認";
       }
     } else {
