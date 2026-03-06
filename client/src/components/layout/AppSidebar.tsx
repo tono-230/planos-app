@@ -17,6 +17,7 @@ const hqItems = [
   { title: "ダッシュボード", url: "/hq/dashboard", icon: LayoutDashboard },
   { title: "週間売場計画", url: "/hq/plan", icon: Map },
   { title: "分析結果", url: "/hq/analysis", icon: BarChart3 },
+  { title: "キャパシティ管理", url: "/hq/capacity", icon: BarChart3 },
 ];
 
 const storeItems = [

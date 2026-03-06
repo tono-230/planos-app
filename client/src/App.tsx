@@ -12,6 +12,7 @@ import { Shell } from "./components/layout/Shell";
 import Dashboard from "./pages/hq/Dashboard";
 import PlanManager from "./pages/hq/Plan";
 import AnalysisResult from "./pages/hq/Analysis";
+import CapacityManagement from "./pages/hq/Capacity";
 import StoreLayout from "./pages/store/Layout";
 import ScanSubmission from "./pages/store/Scan";
 
@@ -28,6 +29,7 @@ function Router() {
         <Route path="/hq/dashboard" component={Dashboard} />
         <Route path="/hq/plan" component={PlanManager} />
         <Route path="/hq/analysis" component={AnalysisResult} />
+        <Route path="/hq/capacity" component={CapacityManagement} />
         
         {/* Store Routes */}
         <Route path="/store/layout" component={StoreLayout} />
