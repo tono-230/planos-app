@@ -12,6 +12,7 @@ import { Shell } from "./components/layout/Shell";
 import Dashboard from "./pages/hq/Dashboard";
 import PlanManager from "./pages/hq/Plan";
 import AnalysisResult from "./pages/hq/Analysis";
+import StoreLayout from "./pages/store/Layout";
 import ScanSubmission from "./pages/store/Scan";
 
 function Router() {
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/hq/analysis" component={AnalysisResult} />
         
         {/* Store Routes */}
+        <Route path="/store/layout" component={StoreLayout} />
         <Route path="/store/scan" component={ScanSubmission} />
         
         {/* Fallback to 404 */}

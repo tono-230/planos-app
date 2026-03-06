@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Map, BarChart3, Store, Settings, ScanLine } from "lucide-react";
+import { LayoutDashboard, Map, BarChart3, Store, Settings, ScanLine, LayoutGrid } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +20,7 @@ const hqItems = [
 ];
 
 const storeItems = [
+  { title: "店舗レイアウト", url: "/store/layout", icon: LayoutGrid },
   { title: "スキャン送信", url: "/store/scan", icon: ScanLine },
 ];
 
