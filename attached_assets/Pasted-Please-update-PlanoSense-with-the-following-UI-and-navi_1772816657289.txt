@@ -1,0 +1,135 @@
+Please update PlanoSense with the following UI and navigation changes.
+
+================================
+1. LEFT SIDEBAR NAVIGATION
+================================
+
+Remove the menu item:
+SVキャパシティ管理
+
+Reorganize the sidebar into two main sections only:
+
+本部
+- ダッシュボード
+  - This is the HQ dashboard
+  - It must allow drill-down by AM and SV
+- 今週の売場計画
+  - Show last week and this week side-by-side
+  - Highlight differences clearly
+
+店舗
+- ダッシュボード
+  - Store dashboard
+  - Must be filterable by AM and SV
+- 店舗のキャパシティ管理
+- スキャン結果
+  - This is the current 実行分析 page
+  - Only change the name and title to スキャン結果
+- スキャン送信
+- 今週の売場計画
+  - This is the store-facing page
+  - Stores should be able to view HQ instructions and adjust the plan
+
+Sidebar design requirements:
+- Group the menu visually under 本部 and 店舗
+- Add subtle spacing or divider lines
+- Keep the existing icon style
+- Make it look like a real admin product
+
+================================
+2. PAGE NAME CHANGE
+================================
+
+Rename page:
+
+実行分析 → スキャン結果
+
+Only change the title and menu name.
+Keep all current functionality.
+
+================================
+3. HQ 売場計画 PAGE
+================================
+
+For 本部 → 今週の売場計画:
+
+Show two panels side by side:
+
+左：先週
+右：今週
+
+Make differences easy to understand visually.
+
+The goal is to allow HQ to quickly see plan changes.
+
+================================
+4. STORE 売場計画 PAGE
+================================
+
+For 店舗 → 今週の売場計画:
+
+Show:
+
+左：先週
+右：今週
+
+Stores should be able to adjust the current week plan
+while referencing the HQ instructions.
+
+================================
+5. STORE LAYOUT + PLAN LINKAGE
+================================
+
+Connect the following two pages:
+
+店舗レイアウト
+今週の売場計画
+
+They should represent the same underlying store plan data.
+
+Users should be able to edit from either interface.
+
+If a fixture is updated in the layout view,
+the change should appear in the plan view.
+
+If a fixture allocation is updated in the plan view,
+the layout view should update accordingly.
+
+Treat the layout view and plan view as two interfaces
+for the same store plan data.
+
+================================
+6. STORE PLAN UX
+================================
+
+On the store plan page:
+
+Show two columns:
+
+先週
+今週
+
+Make visual differences obvious.
+
+Interactions:
+- Clicking a fixture in the layout highlights it in the plan
+- Clicking a fixture in the plan highlights it in the layout
+
+Example:
+Click "Wall A" in layout → open Wall A plan detail
+Edit brand allocation in plan → update layout block labels
+
+================================
+7. IMPLEMENTATION NOTE
+================================
+
+Do not create a complex backend yet.
+
+Use a shared mock data structure for:
+
+store layout
+store plan
+
+Both views should read and update the same state.
+
+The goal is a working prototype with synchronized UI.

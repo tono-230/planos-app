@@ -1,0 +1,138 @@
+Please update PlanoSense with the following information architecture and screen behavior changes.
+
+Important:
+- Remove "SVキャパシティ管理" from the left menu
+- Reorganize the app into only two main sections:
+  1. 本部
+  2. 店舗
+- Keep the UI clean and product-like
+- Use Japanese labels in the UI
+
+====================================
+1. LEFT SIDEBAR NAVIGATION
+====================================
+
+Please restructure the left sidebar navigation as follows:
+
+本部
+- ダッシュボード
+  - This is the HQ dashboard
+  - It should support drill-down by AM and SV
+- 今週の売場計画
+  - Show last week and this week side by side
+  - Make differences easy to understand visually
+
+店舗
+- ダッシュボード
+  - This is the store dashboard
+  - It should be filterable by AM and SV
+- 店舗のキャパシティ管理
+- スキャン結果
+  - This should be the same functionality as the current 実行分析 page
+  - Only change the menu name and page title from 実行分析 to スキャン結果
+- スキャン送信
+- 今週の売場計画
+  - This is a store-facing page
+  - Store users should be able to check HQ instructions and make updates while viewing the plan
+  - Show last week and this week side by side
+  - Make differences easy to understand visually
+
+Design requirements for sidebar:
+- Visually group the menu into "本部" and "店舗"
+- Add subtle spacing and divider lines between sections
+- Keep existing icon style
+- Make the navigation feel like a real admin product, not a prototype
+
+====================================
+2. PAGE / FUNCTION CHANGES
+====================================
+
+A. Rename current 実行分析 page
+- Change the menu name to "スキャン結果"
+- Change the page title to "スキャン結果"
+- Keep the same current functionality
+
+B. 店舗ダッシュボード
+- This is for store-level overview
+- Add filters for AM and SV
+- Make it clear this is not the HQ dashboard
+
+C. 本部ダッシュボード
+- This is the HQ overview page
+- Add drill-down by AM and SV
+- The drill-down can start with filters or clickable summary cards
+
+D. 今週の売場計画 (HQ page)
+- Show last week and this week side by side
+- Highlight differences clearly
+- The goal is to compare plan changes easily
+
+E. 今週の売場計画 (Store page)
+- Also show last week and this week side by side
+- Store users should be able to see HQ instructions and adjust based on them
+
+====================================
+3. STORE LAYOUT + PLAN LINKAGE
+====================================
+
+Please make "売場レイアウト" and "今週の売場計画" connected.
+
+Concept:
+- The store layout and the store plan should reflect the same underlying data
+- Users should be able to edit from either side:
+  1. visually from the layout
+  2. structurally from the plan view
+
+Required behavior:
+- If a fixture/block is updated in the store layout, the corresponding plan data should also update
+- If a fixture allocation is updated in the plan view, the store layout should also update
+- Treat layout view and plan view as two different interfaces for the same store plan data
+- Do not build a complex backend yet
+- A shared mock state / local data structure is enough for now
+
+====================================
+4. STORE PLAN VIEW UX
+====================================
+
+For the store-facing 今週の売場計画 page:
+
+- Show two columns or panels:
+  - 先週
+  - 今週
+- Make the differences visually obvious
+- Allow editing of the current week's plan
+- Allow users to click a fixture in the plan and highlight the same fixture in the store layout
+- Allow users to click a fixture in the store layout and show the corresponding plan detail
+
+Example interaction:
+- Click "Wall A" in the layout -> open the matching plan detail
+- Update brand allocation in the plan -> reflect it in the layout block labels
+
+====================================
+5. DESIGN DIRECTION
+====================================
+
+- Keep the existing modern admin dashboard look
+- Clean white background
+- Subtle borders
+- Strong Japanese typography
+- Make it feel like a professional retail operations product
+- Avoid prototype-like placeholder feeling
+- Side-by-side comparison should be easy to scan visually
+- Use cards, tables, and layout blocks consistently
+
+====================================
+6. IMPLEMENTATION APPROACH
+====================================
+
+For now:
+- Keep the data simple
+- No backend needed
+- Use shared mock data/state for plan + layout synchronization
+- Prioritize working UI and linked behavior over perfect architecture
+
+Suggested internal concept:
+- one shared store plan data object
+- two views bound to the same data:
+  - layout view
+  - weekly plan view

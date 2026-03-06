@@ -23,13 +23,14 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: React 18 with TypeScript, built with Vite
 - **Routing**: `wouter` (lightweight client-side router)
   - HQ routes: `/hq/dashboard`, `/hq/plan`, `/hq/stores`, `/hq/sv-capacity`
-  - Store routes: `/store/:id/summary`, `/store/:id/analysis`, `/store/:id/capacity`, `/store/:id/layout`, `/store/:id/scan`
+  - Store routes: `/store/:id/summary`, `/store/:id/analysis`, `/store/:id/capacity`, `/store/:id/layout`, `/store/:id/plan`, `/store/:id/scan`
+- **Shared store plan state**: `StorePlanContext` (context/StorePlanContext.tsx) — provides fixture list, this-week brand assignments, last-week mock, and selectedFixtureId; wraps entire app in App.tsx so Layout and StorePlan share the same state bidirectionally
 - **UI Library**: shadcn/ui (New York style) with full Radix UI primitive set
 - **Styling**: Tailwind CSS with CSS custom properties for theming; DM Sans + Outfit fonts
 - **State/Data fetching**: TanStack React Query v5 with custom hooks per resource (`use-locations`, `use-products`, `use-plans`, `use-scans`, `use-analysis`)
 - **Forms**: react-hook-form + @hookform/resolvers + zod validation
 - **Charts**: Recharts (via shadcn chart wrapper)
-- **Layout**: Persistent sidebar (`AppSidebar`) wrapped in a `Shell` component with collapsible behavior; sidebar dynamically shows HQ or store-level nav based on current route
+- **Layout**: Persistent sidebar (`AppSidebar`) with two permanent sections — 本部 (HQ: ダッシュボード, 今週の売場計画) and 店舗 (Store: ダッシュボード, 店舗のキャパシティ管理, スキャン結果, スキャン送信, 今週の売場計画, 店舗レイアウト); store-section links adapt to current storeId from URL
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express 5

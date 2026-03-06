@@ -66,9 +66,9 @@ export default function StoreAnalysis() {
           <span>/</span>
           <Link href={`/store/${storeId}/summary`} className="hover:text-foreground transition-colors">{storeName}</Link>
           <span>/</span>
-          <span className="text-foreground font-medium">実行分析</span>
+          <span className="text-foreground font-medium">スキャン結果</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">実行分析</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">スキャン結果</h1>
         <p className="mt-2 text-muted-foreground">本部計画と実際の店舗スキャンデータの自動照合結果です。</p>
       </div>
 
