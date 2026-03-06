@@ -2,7 +2,7 @@ import { useScans } from "@/hooks/use-scans";
 import { useAnalysis } from "@/hooks/use-analysis";
 import { usePlans } from "@/hooks/use-plans";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CheckCircle2, AlertCircle, ShoppingCart, MapPin } from "lucide-react";
+import { Activity, CheckCircle2, AlertCircle, ShoppingCart, MapPin, Store } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
