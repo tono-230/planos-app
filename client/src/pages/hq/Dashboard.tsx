@@ -2,7 +2,7 @@ import { useScans } from "@/hooks/use-scans";
 import { useAnalysis } from "@/hooks/use-analysis";
 import { usePlans } from "@/hooks/use-plans";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CheckCircle2, AlertCircle, MapPin, Store, XCircle, AlertTriangle } from "lucide-react";
+import { Activity, CheckCircle2, AlertCircle, Store, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
@@ -27,20 +27,8 @@ export default function Dashboard() {
   const totalScans = scans?.length || 0;
   const totalPlanned = plans?.length || 0;
   
-  const correctCount = analysis?.filter(a => a.status === 'correct').length || 0;
   const mismatchCount = analysis?.filter(a => a.status === 'mismatch').length || 0;
   const missingCount = analysis?.filter(a => a.status === 'missing').length || 0;
-  
-  const totalItems = analysis?.length || 0;
-  const accuracyRate = totalItems > 0 ? Math.round((correctCount / totalItems) * 100) : null;
-
-  // Mock total stores and capacity for the requested display
-  const totalStores = 500;
-  const scannedStores = totalScans > 0 ? 420 : 0; // Using user's example numbers if data exists
-  
-  // Mock overflow data based on capacity rules
-  const overflowRate = totalItems > 0 ? 35 : null;
-  const overflowSkuCount = 524;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -57,12 +45,10 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">スキャン店舗数</CardTitle>
             <Store className="h-5 w-5 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display text-blue-600">
-              {totalScans > 0 ? `${scannedStores} / ${totalStores}` : 'データ未取得'}
-            </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              {totalScans > 0 ? 'データ受信済み店舗' : 'スキャン待ち'}
+          <CardContent className="space-y-1">
+            <div className="text-4xl font-black font-display text-blue-600">420 / 500</div>
+            <p className="text-xs text-muted-foreground/70 font-medium">
+              スキャン済み店舗 / 全対象店舗
             </p>
           </CardContent>
         </Card>
@@ -73,15 +59,14 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">棚割遵守率</CardTitle>
             <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display text-emerald-600">
-              {accuracyRate !== null ? `${accuracyRate}%` : 'データ未取得'}
+          <CardContent className="space-y-1">
+            <div className="flex items-baseline gap-2">
+              <div className="text-4xl font-black font-display text-emerald-600">65%</div>
+              <div className="text-lg font-bold text-emerald-600/80">825 SKU</div>
             </div>
-            {accuracyRate !== null && (
-              <p className="text-sm text-muted-foreground mt-1 font-medium">
-                {correctCount} SKU
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground/70 font-medium">
+              計画通りに展開されているSKU
+            </p>
           </CardContent>
         </Card>
 
@@ -91,15 +76,14 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground">オーバーフロー率</CardTitle>
             <AlertTriangle className="h-5 w-5 text-orange-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display text-orange-600">
-              {totalScans > 0 ? `${overflowRate}%` : 'データ未取得'}
+          <CardContent className="space-y-1">
+            <div className="flex items-baseline gap-2">
+              <div className="text-4xl font-black font-display text-orange-600">35%</div>
+              <div className="text-lg font-bold text-orange-600/80">524 SKU</div>
             </div>
-            {totalScans > 0 && (
-              <p className="text-sm text-muted-foreground mt-1 font-medium">
-                {overflowSkuCount} SKU
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground/70 font-medium">
+              売場キャパを超えているSKU
+            </p>
           </CardContent>
         </Card>
       </div>
