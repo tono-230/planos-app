@@ -20,7 +20,7 @@ export default function ScanSubmission() {
 
   const handleSimulateScan = () => {
     if (!locations || !products || locations.length === 0 || products.length === 0) {
-      toast({ title: "Error", description: "System data not loaded.", variant: "destructive" });
+      toast({ title: "エラー", description: "システムデータが読み込まれていません。", variant: "destructive" });
       return;
     }
 
@@ -41,8 +41,8 @@ export default function ScanSubmission() {
         onSuccess: (data) => {
           setIsScanning(false);
           toast({ 
-            title: "Scan Complete", 
-            description: `Successfully captured and transmitted ${data.count} RFID tags to HQ.` 
+            title: "スキャン完了", 
+            description: `${data.count} 件のRFIDタグを検出し、本部へ送信しました。` 
           });
         },
         onError: () => {
@@ -54,7 +54,7 @@ export default function ScanSubmission() {
 
   const handleClear = () => {
     clearScans.mutate(undefined, {
-      onSuccess: () => toast({ title: "Cleared", description: "All previous scan data removed." })
+      onSuccess: () => toast({ title: "クリア完了", description: "以前のスキャンデータはすべて削除されました。" })
     });
   };
 
@@ -66,16 +66,16 @@ export default function ScanSubmission() {
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-accent/10 text-accent mb-4">
           <Smartphone className="h-8 w-8" />
         </div>
-        <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">Store Operations</h1>
-        <p className="text-muted-foreground text-lg">Mobile RFID Scan Simulator</p>
+        <h1 className="text-3xl font-display font-bold tracking-tight text-foreground">店舗オペレーション</h1>
+        <p className="text-muted-foreground text-lg">RFIDスキャン シミュレーター</p>
       </div>
 
       <Card className="border-border/50 shadow-2xl shadow-accent/5 overflow-hidden">
         <div className="h-2 w-full bg-accent" />
         <CardHeader className="text-center pb-8 pt-8">
-          <CardTitle className="text-2xl">Capture Display Data</CardTitle>
+          <CardTitle className="text-2xl">売場データのキャプチャ</CardTitle>
           <CardDescription className="text-base mt-2">
-            Simulate walking the store floor and capturing RFID tags from shelves and products automatically.
+            店舗を巡回し、棚や商品からRFIDタグを自動的に読み取る動作をシミュレートします。
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center pb-12 space-y-8">
@@ -94,12 +94,12 @@ export default function ScanSubmission() {
               {isScanning ? (
                 <>
                   <RefreshCw className="h-12 w-12 animate-spin" />
-                  <span className="font-bold">Scanning...</span>
+                  <span className="font-bold">スキャン中...</span>
                 </>
               ) : (
                 <>
                   <ScanFace className="h-16 w-16 text-accent" />
-                  <span className="font-bold font-display">START SCAN</span>
+                  <span className="font-bold font-display">スキャン開始</span>
                 </>
               )}
             </Button>
@@ -107,14 +107,14 @@ export default function ScanSubmission() {
 
           <div className="w-full max-w-md bg-secondary/50 rounded-xl p-4 border border-border/50">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Device Status</span>
+              <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">デバイス状態</span>
               <span className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
-                <CheckCircle2 className="h-4 w-4" /> Connected to HQ
+                <CheckCircle2 className="h-4 w-4" /> 本部接続済み
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Previous Scans in DB:</span>
-              <span className="font-bold text-foreground text-lg">{scans?.length || 0} items</span>
+              <span className="text-sm text-muted-foreground">DB内の既存スキャン数:</span>
+              <span className="font-bold text-foreground text-lg">{scans?.length || 0} 件</span>
             </div>
           </div>
 
@@ -126,7 +126,7 @@ export default function ScanSubmission() {
                className="text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground mt-4"
              >
                <Trash2 className="h-4 w-4 mr-2" />
-               Reset Device Data (Testing)
+               デバイスデータの初期化 (テスト用)
              </Button>
           )}
 

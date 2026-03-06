@@ -17,13 +17,13 @@ export default function AnalysisResult() {
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case 'correct':
-        return <Badge className="bg-[hsl(var(--status-correct))] hover:bg-[hsl(var(--status-correct))]/90 border-transparent shadow-sm gap-1"><CheckCircle2 className="h-3 w-3"/> Correct</Badge>;
+        return <Badge className="bg-[hsl(var(--status-correct))] hover:bg-[hsl(var(--status-correct))]/90 border-transparent shadow-sm gap-1"><CheckCircle2 className="h-3 w-3"/> 正解</Badge>;
       case 'wrong_location':
-        return <Badge className="bg-[hsl(var(--status-wrong))] text-amber-950 hover:bg-[hsl(var(--status-wrong))]/90 border-transparent shadow-sm gap-1"><AlertTriangle className="h-3 w-3"/> Wrong Location</Badge>;
+        return <Badge className="bg-[hsl(var(--status-wrong))] text-amber-950 hover:bg-[hsl(var(--status-wrong))]/90 border-transparent shadow-sm gap-1"><AlertTriangle className="h-3 w-3"/> ロケーション違い</Badge>;
       case 'missing':
-        return <Badge className="bg-[hsl(var(--status-missing))] hover:bg-[hsl(var(--status-missing))]/90 border-transparent shadow-sm gap-1"><XCircle className="h-3 w-3"/> Missing</Badge>;
+        return <Badge className="bg-[hsl(var(--status-missing))] hover:bg-[hsl(var(--status-missing))]/90 border-transparent shadow-sm gap-1"><XCircle className="h-3 w-3"/> 欠落</Badge>;
       case 'extra':
-        return <Badge className="bg-[hsl(var(--status-extra))] hover:bg-[hsl(var(--status-extra))]/90 border-transparent shadow-sm gap-1"><Info className="h-3 w-3"/> Extra (Unplanned)</Badge>;
+        return <Badge className="bg-[hsl(var(--status-extra))] hover:bg-[hsl(var(--status-extra))]/90 border-transparent shadow-sm gap-1"><Info className="h-3 w-3"/> 計画外</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -32,13 +32,13 @@ export default function AnalysisResult() {
   const getStatusDescription = (item: any) => {
     switch (item.status) {
       case 'correct':
-        return <span className="text-muted-foreground text-sm">Found in assigned zone: <strong className="text-foreground">{item.actualLocation?.name}</strong></span>;
+        return <span className="text-muted-foreground text-sm">指定のゾーンで検出: <strong className="text-foreground">{item.actualLocation?.name}</strong></span>;
       case 'wrong_location':
-        return <span className="text-muted-foreground text-sm">Found in <strong className="text-foreground">{item.actualLocation?.name}</strong>, but planned for <strong className="text-foreground">{item.expectedLocation?.name}</strong></span>;
+        return <span className="text-muted-foreground text-sm"><strong className="text-foreground">{item.actualLocation?.name}</strong> で検出されましたが、本来の計画は <strong className="text-foreground">{item.expectedLocation?.name}</strong> です。</span>;
       case 'missing':
-        return <span className="text-muted-foreground text-sm">Expected in <strong className="text-foreground">{item.expectedLocation?.name}</strong>, but not detected anywhere.</span>;
+        return <span className="text-muted-foreground text-sm"><strong className="text-foreground">{item.expectedLocation?.name}</strong> に陳列予定ですが、どこにも検出されませんでした。</span>;
       case 'extra':
-        return <span className="text-muted-foreground text-sm">Detected in <strong className="text-foreground">{item.actualLocation?.name}</strong>, but not in weekly plan.</span>;
+        return <span className="text-muted-foreground text-sm"><strong className="text-foreground">{item.actualLocation?.name}</strong> で検出されましたが、週間計画には含まれていません。</span>;
       default:
         return null;
     }
@@ -53,21 +53,21 @@ export default function AnalysisResult() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Compliance Analysis</h1>
-        <p className="mt-2 text-muted-foreground">Automated comparison between HQ plan and physical store scans.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">分析結果</h1>
+        <p className="mt-2 text-muted-foreground">本部計画と実際の店舗スキャンデータの自動照合結果です。</p>
       </div>
 
       <Card className="border-border/50 shadow-xl shadow-black/5 overflow-hidden">
         <CardHeader className="bg-secondary/30 border-b border-border/40 pb-4">
-          <CardTitle className="text-xl">Detection Results</CardTitle>
-          <CardDescription>Based on the latest RFID scan data</CardDescription>
+          <CardTitle className="text-xl">照合結果</CardTitle>
+          <CardDescription>最新のRFIDスキャンデータに基づいています</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {!sortedAnalysis || sortedAnalysis.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
               <BoxSelect className="h-12 w-12 text-border mb-4" />
-              <p className="text-lg font-medium text-foreground">No data available</p>
-              <p className="text-sm mt-1">Ensure a plan exists and stores have submitted scans.</p>
+              <p className="text-lg font-medium text-foreground">データがありません</p>
+              <p className="text-sm mt-1">計画が作成され、店舗からスキャンデータが送信されていることを確認してください。</p>
             </div>
           ) : (
             <div className="divide-y divide-border/40">

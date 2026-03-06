@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/sidebar";
 
 const hqItems = [
-  { title: "Dashboard", url: "/hq/dashboard", icon: LayoutDashboard },
-  { title: "Weekly Plan", url: "/hq/plan", icon: Map },
-  { title: "Analysis Results", url: "/hq/analysis", icon: BarChart3 },
+  { title: "ダッシュボード", url: "/hq/dashboard", icon: LayoutDashboard },
+  { title: "週間売場計画", url: "/hq/plan", icon: Map },
+  { title: "分析結果", url: "/hq/analysis", icon: BarChart3 },
 ];
 
 const storeItems = [
-  { title: "Scan Submission", url: "/store/scan", icon: ScanLine },
+  { title: "スキャン送信", url: "/store/scan", icon: ScanLine },
 ];
 
 export function AppSidebar() {
@@ -35,14 +35,14 @@ export function AppSidebar() {
           </div>
           <div className="flex flex-col">
             <span className="font-display text-lg font-bold leading-tight">PlanoSense</span>
-            <span className="text-xs font-medium text-muted-foreground">Retail Operations</span>
+            <span className="text-xs font-medium text-muted-foreground">店舗オペレーション</span>
           </div>
         </div>
       </SidebarHeader>
       
       <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-bold tracking-wider text-primary/70 uppercase mb-2">Headquarters</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-bold tracking-wider text-primary/70 uppercase mb-2">本部 (HQ)</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {hqItems.map((item) => {
@@ -71,7 +71,7 @@ export function AppSidebar() {
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-bold tracking-wider text-accent uppercase mb-2">Retail Store</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-bold tracking-wider text-accent uppercase mb-2">店舗 (Store)</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {storeItems.map((item) => {

@@ -22,7 +22,7 @@ export default function PlanManager() {
 
   const handleAddPlan = () => {
     if (!selectedLocation || !selectedProduct) {
-      toast({ title: "Incomplete", description: "Please select both a location and a product.", variant: "destructive" });
+      toast({ title: "入力不備", description: "ロケーションと商品の両方を選択してください。", variant: "destructive" });
       return;
     }
 
@@ -31,7 +31,7 @@ export default function PlanManager() {
       productId: parseInt(selectedProduct),
     }, {
       onSuccess: () => {
-        toast({ title: "Success", description: "Plan mapped successfully." });
+        toast({ title: "完了", description: "計画が正常に登録されました。" });
         setSelectedProduct("");
       }
     });
@@ -43,8 +43,8 @@ export default function PlanManager() {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Weekly Planogram</h1>
-          <p className="mt-2 text-muted-foreground">Assign product groups to physical store locations.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">週間売場計画</h1>
+          <p className="mt-2 text-muted-foreground">商品グループを店舗の陳列場所に割り当てます。</p>
         </div>
       </div>
 
@@ -56,19 +56,19 @@ export default function PlanManager() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Plus className="h-5 w-5 text-primary" />
-                Assign Display
+                陳列の割り当て
               </CardTitle>
-              <CardDescription>Create a new rule for store execution.</CardDescription>
+              <CardDescription>店舗での実施ルールを新規作成します。</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-semibold flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-muted-foreground" /> 
-                  Location Zone
+                  ロケーションゾーン
                 </label>
                 <Select value={selectedLocation} onValueChange={setSelectedLocation} disabled={isFormLoading}>
                   <SelectTrigger className="w-full bg-background border-border/50 focus:ring-primary/20">
-                    <SelectValue placeholder="Select a zone..." />
+                    <SelectValue placeholder="ゾーンを選択..." />
                   </SelectTrigger>
                   <SelectContent>
                     {locations?.map((loc) => (
@@ -81,11 +81,11 @@ export default function PlanManager() {
               <div className="space-y-2">
                 <label className="text-sm font-semibold flex items-center gap-2">
                   <Package className="h-4 w-4 text-muted-foreground" />
-                  Product Group
+                  商品グループ
                 </label>
                 <Select value={selectedProduct} onValueChange={setSelectedProduct} disabled={isFormLoading}>
                   <SelectTrigger className="w-full bg-background border-border/50 focus:ring-primary/20">
-                    <SelectValue placeholder="Select a product..." />
+                    <SelectValue placeholder="商品を選択..." />
                   </SelectTrigger>
                   <SelectContent>
                     {products?.map((prod) => (
@@ -102,7 +102,7 @@ export default function PlanManager() {
                 disabled={isFormLoading || createPlan.isPending || !selectedLocation || !selectedProduct}
                 className="w-full shadow-md shadow-primary/20 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11"
               >
-                {createPlan.isPending ? "Assigning..." : "Add to Plan"}
+                {createPlan.isPending ? "登録中..." : "計画に追加"}
               </Button>
             </CardContent>
           </Card>
@@ -114,7 +114,7 @@ export default function PlanManager() {
             <CardHeader className="border-b border-border/30 bg-secondary/30 pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Layers className="h-5 w-5 text-muted-foreground" />
-                Current Active Mappings
+                現在の有効なマッピング
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1">
@@ -125,8 +125,8 @@ export default function PlanManager() {
               ) : plans?.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center p-8 text-muted-foreground">
                   <MapPin className="h-12 w-12 text-border mb-4" />
-                  <p className="text-lg font-medium text-foreground">No plans configured</p>
-                  <p className="text-sm mt-1">Use the form to start assigning products to zones.</p>
+                  <p className="text-lg font-medium text-foreground">計画が設定されていません</p>
+                  <p className="text-sm mt-1">フォームを使用して商品をゾーンに割り当ててください。</p>
                 </div>
               ) : (
                 <div className="divide-y divide-border/40">
@@ -140,10 +140,10 @@ export default function PlanManager() {
                             <MapPin className="h-5 w-5" />
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground">{loc?.name || "Unknown Zone"}</p>
+                            <p className="font-semibold text-foreground">{loc?.name || "不明なゾーン"}</p>
                             <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-0.5">
                               <Package className="h-3 w-3" />
-                              <span>{prod?.name || "Unknown Product"}</span>
+                              <span>{prod?.name || "不明な商品"}</span>
                               <span className="px-1.5 py-0.5 rounded-md bg-border/50 text-[10px] uppercase font-bold tracking-wider ml-2">
                                 {prod?.productGroup}
                               </span>
