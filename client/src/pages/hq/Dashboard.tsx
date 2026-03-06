@@ -31,13 +31,16 @@ export default function Dashboard() {
   const mismatchCount = analysis?.filter(a => a.status === 'mismatch').length || 0;
   const missingCount = analysis?.filter(a => a.status === 'missing').length || 0;
   
-  // Total items expected across all scanned blocks
   const totalItems = analysis?.length || 0;
   const accuracyRate = totalItems > 0 ? Math.round((correctCount / totalItems) * 100) : null;
 
-  // For this mock, we assume each scan record is from a unique store or just count total scans as "store data points"
-  // In a real app, we'd count unique store IDs
-  const storeCount = totalScans;
+  // Mock total stores and capacity for the requested display
+  const totalStores = 500;
+  const scannedStores = totalScans > 0 ? 420 : 0; // Using user's example numbers if data exists
+  
+  // Mock overflow data based on capacity rules
+  const overflowRate = totalItems > 0 ? 35 : null;
+  const overflowSkuCount = 524;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -46,69 +49,57 @@ export default function Dashboard() {
         <p className="mt-2 text-muted-foreground">全店舗の棚割実行状況をリアルタイムで監視します</p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {/* 1. スキャン店舗 */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* 1. スキャン店舗数 (Blue) */}
         <Card className="border-none shadow-md shadow-black/5 overflow-hidden relative group">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">スキャン店舗</CardTitle>
-            <Store className={`h-5 w-5 ${storeCount > 0 ? 'text-emerald-500' : 'text-amber-500'}`} />
+            <CardTitle className="text-sm font-medium text-muted-foreground">スキャン店舗数</CardTitle>
+            <Store className="h-5 w-5 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display">{storeCount > 0 ? `${storeCount} 店舗` : '待機中'}</div>
+            <div className="text-3xl font-bold font-display text-blue-600">
+              {totalScans > 0 ? `${scannedStores} / ${totalStores}` : 'データ未取得'}
+            </div>
             <p className="text-sm text-muted-foreground mt-1">
-              {storeCount > 0 ? 'データ受信済み' : 'データ未取得'}
+              {totalScans > 0 ? 'データ受信済み店舗' : 'スキャン待ち'}
             </p>
           </CardContent>
         </Card>
 
-        {/* 2. 棚割遵守率 */}
+        {/* 2. 棚割遵守率 (Green) */}
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">棚割遵守率</CardTitle>
-            <CheckCircle2 className="h-5 w-5 text-primary" />
+            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display">
+            <div className="text-3xl font-bold font-display text-emerald-600">
               {accuracyRate !== null ? `${accuracyRate}%` : 'データ未取得'}
             </div>
             {accuracyRate !== null && (
-              <div className="w-full bg-secondary h-2 rounded-full mt-3 overflow-hidden">
-                <div 
-                  className="bg-primary h-full rounded-full transition-all duration-1000 ease-out" 
-                  style={{ width: `${accuracyRate}%` }} 
-                />
-              </div>
+              <p className="text-sm text-muted-foreground mt-1 font-medium">
+                {correctCount} SKU
+              </p>
             )}
           </CardContent>
         </Card>
 
-        {/* 3. 誤配置SKU */}
+        {/* 3. オーバーフロー率 (Orange) */}
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">誤配置SKU</CardTitle>
-            <AlertTriangle className={`h-5 w-5 ${mismatchCount > 0 ? 'text-amber-500' : 'text-muted-foreground'}`} />
+            <CardTitle className="text-sm font-medium text-muted-foreground">オーバーフロー率</CardTitle>
+            <AlertTriangle className="h-5 w-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display">{mismatchCount}</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              別ブロックでの検出
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* 4. 未展開SKU */}
-        <Card className="border-none shadow-md shadow-black/5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-destructive/10 rounded-bl-full -z-10" />
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">未展開SKU</CardTitle>
-            <XCircle className={`h-5 w-5 ${missingCount > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display text-foreground">{missingCount}</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              売場未検出
-            </p>
+            <div className="text-3xl font-bold font-display text-orange-600">
+              {totalScans > 0 ? `${overflowRate}%` : 'データ未取得'}
+            </div>
+            {totalScans > 0 && (
+              <p className="text-sm text-muted-foreground mt-1 font-medium">
+                {overflowSkuCount} SKU
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
