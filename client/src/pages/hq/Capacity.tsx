@@ -55,11 +55,11 @@ export default function CapacityManagement() {
   const getSalesIcon = (sales: string) => {
     switch (sales) {
       case "高":
-        return <div className="flex items-center text-emerald-600 font-bold"><TrendingUp className="h-4 w-4 mr-1" /> ↑ 高</div>;
+        return <div className="flex items-center text-emerald-600 font-bold">↑ 高</div>;
       case "中":
-        return <div className="flex items-center text-blue-600 font-bold"><MoveRight className="h-4 w-4 mr-1" /> → 中</div>;
+        return <div className="flex items-center text-blue-600 font-bold">→ 中</div>;
       case "低":
-        return <div className="flex items-center text-rose-600 font-bold"><TrendingDown className="h-4 w-4 mr-1" /> ↓ 低</div>;
+        return <div className="flex items-center text-rose-600 font-bold">↓ 低</div>;
       default:
         return sales;
     }
