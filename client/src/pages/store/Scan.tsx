@@ -4,30 +4,37 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse, Info } from "lucide-react";
+import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse } from "lucide-react";
 
 // Mock data generation for eyewear RFID scans with planogram comparison
 const generateMockScans = () => {
   const brands = ["AIR Slim", "SUN Classic", "GB Metal", "JD Bold", "ES Basic", "KM Light"];
   const fixtures = ["入口テーブル", "中央島什器A", "中央島什器B", "壁面A", "壁面B", "レジ横"];
-  const statuses = ["売場に展開", "バックヤード", "不明ロケーション"];
+  const statuses = ["売場に展開", "バックヤード"];
   
   return Array.from({ length: 30 }, (_, i) => {
     const brand = brands[Math.floor(Math.random() * brands.length)];
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const fixture = status === "売場に展開" ? fixtures[Math.floor(Math.random() * fixtures.length)] : "-";
     
     // Planogram comparison logic (mock)
     const plannedFixture = fixtures[Math.floor(Math.random() * fixtures.length)];
     const plannedBlock = brand.split(' ')[0]; // Use brand prefix as block name
     
-    let comparison = "不明";
+    let fixture = "-";
+    let comparison = "要確認";
+
     if (status === "売場に展開") {
-      comparison = fixture === plannedFixture ? "計画通り" : "誤配置";
-    } else if (status === "バックヤード") {
+      // 80% chance to have a fixture, 20% chance to be "unclear" (要確認)
+      if (Math.random() > 0.2) {
+        fixture = fixtures[Math.floor(Math.random() * fixtures.length)];
+        comparison = fixture === plannedFixture ? "計画通り" : "誤配置";
+      } else {
+        fixture = "不明";
+        comparison = "要確認";
+      }
+    } else {
+      // バックヤード
       comparison = "未展開";
-    } else if (status === "不明ロケーション") {
-      comparison = "不明";
     }
 
     return {
@@ -53,7 +60,7 @@ export default function ScanSubmission() {
     const totalSKUs = new Set(scanData.map(s => s.sku)).size;
     const floorCount = scanData.filter(s => s.status === "売場に展開").length;
     const backyardCount = scanData.filter(s => s.status === "バックヤード").length;
-    const unknownCount = scanData.filter(s => s.status === "不明ロケーション").length;
+    const unknownCount = scanData.filter(s => s.comparison === "要確認").length;
     
     return { totalSKUs, floorCount, backyardCount, unknownCount };
   }, [scanData]);
@@ -78,11 +85,10 @@ export default function ScanSubmission() {
         return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-500/20 gap-1">未展開</Badge>;
       case "誤配置":
         return <Badge className="bg-orange-500 hover:bg-orange-600 gap-1">誤配置</Badge>;
-      case "バックヤード":
-        return <Badge variant="secondary" className="gap-1">バックヤード</Badge>;
-      case "不明":
+      case "要確認":
+        return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600 gap-1">要確認</Badge>;
       default:
-        return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600 gap-1">不明</Badge>;
+        return <Badge variant="outline" className="gap-1">{comparison}</Badge>;
     }
   };
 
@@ -156,7 +162,7 @@ export default function ScanSubmission() {
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-500" /> 不明ロケーション数
+              <AlertCircle className="h-4 w-4 text-amber-500" /> 要確認 SKU数
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -179,8 +185,8 @@ export default function ScanSubmission() {
                   <TableHead className="font-bold">商品名</TableHead>
                   <TableHead className="font-bold text-primary">計画ブロック</TableHead>
                   <TableHead className="font-bold">検出什器</TableHead>
-                  <TableHead className="font-bold">状態</TableHead>
-                  <TableHead className="font-bold text-primary">計画との差分</TableHead>
+                  <TableHead className="font-bold">検出状態</TableHead>
+                  <TableHead className="font-bold text-primary">判定結果</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
