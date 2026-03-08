@@ -9,6 +9,8 @@ export interface Fixture {
   description: string;
   capacity: number;
   style: React.CSSProperties;
+  hqInstruction: string;
+  hqInstructionTag: "新作" | "強化展開" | "定番" | "フェア" | "セール";
 }
 
 export const FIXTURES: Fixture[] = [
@@ -21,6 +23,8 @@ export const FIXTURES: Fixture[] = [
     description: "上部壁面の主要展示エリア。最も視認性が高く、ホットブランドを配置します。",
     capacity: 48,
     style: { top: "27%", left: "38%", width: "44%", height: "9%" },
+    hqInstruction: "AIR新作を正面にフルディスプレイ。SUN夏コレクション強化展開。視認性最優先で什器面を統一。",
+    hqInstructionTag: "新作",
   },
   {
     id: "wall-right",
@@ -31,6 +35,8 @@ export const FIXTURES: Fixture[] = [
     description: "右側壁面。サブホットブランドのフォーカス展示エリア。",
     capacity: 32,
     style: { top: "27%", right: "0%", width: "9%", height: "52%" },
+    hqInstruction: "GB壁面フォーカス。人気カラー・旬のモデルを前出し展示。サイズ欠けに注意。",
+    hqInstructionTag: "強化展開",
   },
   {
     id: "island-1",
@@ -41,6 +47,8 @@ export const FIXTURES: Fixture[] = [
     description: "中央左島什器。メインブランドの展示エリア。来店客が触れやすいゾーン。",
     capacity: 24,
     style: { top: "39%", left: "21%", width: "27%", height: "30%" },
+    hqInstruction: "JD・ES混在展開。接客の起点として整頓・在庫維持を徹底。試着誘導を強化。",
+    hqInstructionTag: "定番",
   },
   {
     id: "island-2",
@@ -51,6 +59,8 @@ export const FIXTURES: Fixture[] = [
     description: "中央右島什器。フィーチャーブランドおよびセレクト展示エリア。",
     capacity: 24,
     style: { top: "39%", left: "55%", width: "27%", height: "30%" },
+    hqInstruction: "KM新作を中心に展開。NICHEはセレクトコーナーとして演出。棚前面に新商品タグ設置。",
+    hqInstructionTag: "フェア",
   },
   {
     id: "bottom-1",
@@ -61,6 +71,8 @@ export const FIXTURES: Fixture[] = [
     description: "下部左什器。セール・定番ブランドの展示エリア。",
     capacity: 20,
     style: { top: "74%", left: "17%", width: "30%", height: "13%" },
+    hqInstruction: "MOVEセール品前出し。JUNNIと併せてバリュー訴求を強化。値札・プライスカード確認必須。",
+    hqInstructionTag: "セール",
   },
   {
     id: "bottom-2",
@@ -71,6 +83,8 @@ export const FIXTURES: Fixture[] = [
     description: "下部右什器。シーズナル・セールブランドの展示エリア。",
     capacity: 20,
     style: { top: "74%", left: "55%", width: "30%", height: "13%" },
+    hqInstruction: "シーズン雑貨フェア実施。まとめ買い促進のためPOP併設。在庫少品目は補充依頼を。",
+    hqInstructionTag: "フェア",
   },
 ];
 

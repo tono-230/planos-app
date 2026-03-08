@@ -8,8 +8,30 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRight, Pencil, Check, X, ChevronRight } from "lucide-react";
+import { ArrowRight, Pencil, Check, X, MessageSquare } from "lucide-react";
 import { useStorePlan, FIXTURES, BRAND_COLORS, LAST_WEEK, ZONE_STYLES } from "@/context/StorePlanContext";
+import type { Fixture } from "@/context/StorePlanContext";
+
+const HQ_TAG_STYLES: Record<string, string> = {
+  "新作":   "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "強化展開": "bg-blue-100 text-blue-700 border-blue-200",
+  "定番":   "bg-slate-100 text-slate-600 border-slate-200",
+  "フェア": "bg-amber-100 text-amber-700 border-amber-200",
+  "セール": "bg-rose-100 text-rose-700 border-rose-200",
+};
+
+function HqInstructionCell({ fixture }: { fixture: Fixture }) {
+  return (
+    <div className="space-y-1.5">
+      <span className={`inline-flex items-center text-[10px] font-black border rounded px-1.5 py-0.5 ${HQ_TAG_STYLES[fixture.hqInstructionTag] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
+        {fixture.hqInstructionTag}
+      </span>
+      <p className="text-[11px] text-muted-foreground leading-relaxed">
+        {fixture.hqInstruction}
+      </p>
+    </div>
+  );
+}
 
 const STORE_NAMES: Record<string, string> = {
   "1": "渋谷店", "2": "新宿店", "3": "池袋店", "4": "横浜店",
@@ -159,6 +181,22 @@ export default function StorePlan() {
                 </button>
               </div>
 
+              {/* 本部指示 */}
+              <div className="px-4 py-3 border-b border-border/30 bg-primary/[0.02]" data-testid={`hq-instruction-mobile-${fixture.id}`}>
+                <div className="flex items-start gap-2">
+                  <MessageSquare className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-[10px] font-bold text-primary uppercase tracking-wider">本部指示</p>
+                      <span className={`text-[10px] font-black border rounded px-1.5 py-0.5 ${HQ_TAG_STYLES[fixture.hqInstructionTag] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                        {fixture.hqInstructionTag}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{fixture.hqInstruction}</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Current brands */}
               <div className="px-4 py-3.5">
                 <p className="text-[11px] font-semibold text-muted-foreground mb-2 uppercase tracking-wider">今週</p>
@@ -202,11 +240,15 @@ export default function StorePlan() {
 
       {/* ── Desktop: table ── */}
       <div className="hidden md:block rounded-2xl border border-border/50 overflow-hidden shadow-sm">
-        <div className="grid grid-cols-[120px_1fr_1fr_1fr] bg-secondary/30 border-b border-border/40">
+        <div className="grid grid-cols-[90px_1.4fr_0.7fr_0.8fr_0.9fr] bg-secondary/30 border-b border-border/40">
           <div className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">ZONE</div>
+          <div className="px-5 py-3 text-xs font-bold text-primary uppercase tracking-wider border-l border-border/40 flex items-center gap-1.5">
+            <MessageSquare className="h-3.5 w-3.5" />
+            本部指示
+          </div>
           <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider border-l border-border/40">什器</div>
           <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider border-l border-border/40">先週</div>
-          <div className="px-5 py-3 text-xs font-bold text-primary uppercase tracking-wider border-l border-border/40 flex items-center justify-between">
+          <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider border-l border-border/40 flex items-center justify-between">
             <span>今週</span>
             <span className="text-muted-foreground normal-case font-normal text-[11px]">クリックで編集</span>
           </div>
@@ -222,34 +264,44 @@ export default function StorePlan() {
           return (
             <div
               key={fixture.id}
-              className={`grid grid-cols-[120px_1fr_1fr_1fr] border-b border-border/40 last:border-0 transition-colors ${
+              className={`grid grid-cols-[90px_1.4fr_0.7fr_0.8fr_0.9fr] border-b border-border/40 last:border-0 transition-colors ${
                 isSelected ? "bg-primary/5" : "hover:bg-secondary/10"
               }`}
             >
+              {/* ZONE */}
               <div className="px-4 py-4 flex items-start pt-5">
                 <span className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-black border ${zoneStyle.bg} ${zoneStyle.text} ${zoneStyle.border}`} data-testid={`zone-badge-${fixture.id}`}>
                   {fixture.zone}
                 </span>
               </div>
+
+              {/* 本部指示 */}
+              <div className="px-5 py-4 border-l border-border/40" data-testid={`hq-instruction-${fixture.id}`}>
+                <HqInstructionCell fixture={fixture} />
+              </div>
+
+              {/* 什器 */}
               <button
                 className="px-5 py-4 text-left border-l border-border/40"
                 onClick={() => setSelectedFixtureId(isSelected ? null : fixture.id)}
                 data-testid={`plan-row-${fixture.id}`}
               >
-                <div className="flex items-center gap-2.5">
-                  <div className={`h-2 w-2 rounded-full shrink-0 ${fixture.type === "wall" ? "bg-slate-400" : "bg-amber-400"}`} />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{fixture.label}</p>
-                    <p className="text-[11px] text-muted-foreground">{fixture.labelJp}</p>
-                  </div>
+                <div className="flex flex-col gap-0.5">
+                  <div className={`h-1.5 w-1.5 rounded-full ${fixture.type === "wall" ? "bg-slate-400" : "bg-amber-400"} mb-1`} />
+                  <p className="text-sm font-semibold text-foreground leading-tight">{fixture.label}</p>
+                  <p className="text-[11px] text-muted-foreground">{fixture.labelJp}</p>
                   {diff !== "same" && <DiffBadge diff={diff} />}
                 </div>
               </button>
+
+              {/* 先週 */}
               <div className="px-5 py-4 border-l border-border/40 flex flex-wrap gap-1.5 items-start content-start">
                 {lastBrands.length > 0 ? lastBrands.map(b => (
                   <span key={b} className={`text-[11px] font-bold text-white rounded px-1.5 py-0.5 opacity-60 ${BRAND_COLORS[b] || "bg-slate-400"} ${!currBrands.includes(b) ? "line-through opacity-40" : ""}`}>{b}</span>
                 )) : <span className="text-xs text-muted-foreground/50 italic">未割り当て</span>}
               </div>
+
+              {/* 今週 */}
               <div className="px-5 py-4 border-l border-border/40 flex flex-wrap gap-1.5 items-start content-start group relative">
                 {currBrands.length > 0 ? currBrands.map(b => {
                   const isNew = !lastBrands.includes(b);
