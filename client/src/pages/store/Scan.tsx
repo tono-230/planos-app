@@ -15,6 +15,7 @@ import {
   Warehouse, ArrowRight, AlertTriangle, X,
 } from "lucide-react";
 import { Link, useParams } from "wouter";
+import { FIXTURES } from "@/context/StorePlanContext";
 
 const STORE_NAMES: Record<string, string> = {
   "1": "渋谷店", "2": "新宿店", "3": "池袋店", "4": "横浜店",
@@ -23,7 +24,7 @@ const STORE_NAMES: Record<string, string> = {
 
 const generateMockScans = () => {
   const brands = ["AIR Slim", "SUN Classic", "GB Metal", "JD Bold", "ES Basic", "KM Light"];
-  const fixtures = ["上部壁面什器", "右側壁面什器", "島什器 1", "島什器 2", "下部什器 1", "下部什器 2"];
+  const fixtures = FIXTURES.map(f => f.labelJp);
   const statuses = ["売場に展開", "バックヤード"];
 
   return Array.from({ length: 30 }, (_, i) => {
