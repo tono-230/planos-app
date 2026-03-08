@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse } from "lucide-react";
+import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse, ArrowRight } from "lucide-react";
 import { Link, useParams } from "wouter";
 
 const STORE_NAMES: Record<string, string> = {
@@ -12,46 +12,40 @@ const STORE_NAMES: Record<string, string> = {
   "5": "川崎店", "6": "大宮店", "7": "千葉店", "8": "立川店",
 };
 
-// Mock data generation for eyewear RFID scans with planogram comparison
 const generateMockScans = () => {
   const brands = ["AIR Slim", "SUN Classic", "GB Metal", "JD Bold", "ES Basic", "KM Light"];
-  const fixtures = ["入口テーブル", "中央島什器A", "中央島什器B", "壁面A", "壁面B", "レジ横"];
+  const fixtures = ["上部壁面什器", "右側壁面什器", "島什器 1", "島什器 2", "下部什器 1", "下部什器 2"];
   const statuses = ["売場に展開", "バックヤード"];
-  
+
   return Array.from({ length: 30 }, (_, i) => {
-    const brand = brands[Math.floor(Math.random() * brands.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    
-    // Planogram comparison logic (mock)
-    const plannedFixture = fixtures[Math.floor(Math.random() * fixtures.length)];
-    const plannedBlock = brand.split(' ')[0]; // Use brand prefix as block name
-    
+    const brand = brands[Math.floor((i * 7 + 3) % brands.length)];
+    const status = statuses[i % 3 === 0 ? 1 : 0];
+    const plannedFixture = fixtures[Math.floor((i * 5 + 1) % fixtures.length)];
+
     let fixture = "-";
     let comparison = "要確認";
 
     if (status === "売場に展開") {
-      // 80% chance to have a fixture, 20% chance to be "unclear" (要確認)
-      if (Math.random() > 0.2) {
-        fixture = fixtures[Math.floor(Math.random() * fixtures.length)];
+      if (i % 5 !== 0) {
+        fixture = fixtures[Math.floor((i * 3 + 2) % fixtures.length)];
         comparison = fixture === plannedFixture ? "計画通り" : "誤配置";
       } else {
         fixture = "未特定";
         comparison = "要確認";
       }
     } else {
-      // バックヤード
       comparison = "未展開";
     }
 
     return {
       id: i + 1,
-      epc: `3034E4390${Math.random().toString(16).slice(2, 10).toUpperCase()}`,
+      epc: `3034E4390${(i * 0x1a3c5f + 0xdeadbeef).toString(16).toUpperCase().padStart(8, "0").slice(0, 8)}`,
       sku: `EYE-${1000 + i}`,
-      name: `${brand} ${["01", "02", "03"][Math.floor(Math.random() * 3)]}`,
-      fixture: fixture,
-      status: status,
-      plannedBlock: plannedBlock,
-      comparison: comparison
+      name: `${brand} ${["01", "02", "03"][i % 3]}`,
+      fixture,
+      status,
+      plannedBlock: brand.split(" ")[0],
+      comparison,
     };
   });
 };
@@ -70,7 +64,6 @@ export default function ScanSubmission() {
     const floorCount = scanData.filter(s => s.status === "売場に展開").length;
     const backyardCount = scanData.filter(s => s.status === "バックヤード").length;
     const unknownCount = scanData.filter(s => s.comparison === "要確認").length;
-    
     return { totalSKUs, floorCount, backyardCount, unknownCount };
   }, [scanData]);
 
@@ -97,7 +90,7 @@ export default function ScanSubmission() {
       case "要確認":
         return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600 gap-1">要確認</Badge>;
       default:
-        return <Badge variant="outline" className="gap-1">{comparison}</Badge>;
+        return <Badge variant="outline">{comparison}</Badge>;
     }
   };
 
@@ -110,18 +103,18 @@ export default function ScanSubmission() {
             <span>/</span>
             <Link href={`/store/${storeId}/summary`} className="hover:text-foreground transition-colors">{storeName}</Link>
             <span>/</span>
-            <span className="text-foreground font-medium">スキャン送信</span>
+            <span className="text-foreground font-medium">RFIDスキャン</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <ScanLine className="h-8 w-8 text-primary" />
-            RFIDスキャン送信
+            RFIDスキャン
           </h1>
           <p className="mt-2 text-muted-foreground">最新の売場状況をスキャンし、本部へ報告します。</p>
         </div>
         <div className="flex items-center gap-4 bg-secondary/30 p-4 rounded-xl border border-border/50">
           <div className="flex flex-col">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">送信ステータス</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mt-1">
               {isSubmitted ? (
                 <Badge className="bg-emerald-500 hover:bg-emerald-600 gap-1">
                   <CheckCircle2 className="h-3 w-3" /> 送信済み
@@ -133,12 +126,13 @@ export default function ScanSubmission() {
               )}
             </div>
           </div>
-          <Button 
-            disabled={isSubmitted || isSubmitting} 
+          <Button
+            disabled={isSubmitted || isSubmitting}
             onClick={handleSubmit}
             className="shadow-lg shadow-primary/20"
+            data-testid="button-submit-scan"
           >
-            {isSubmitting ? "送信中..." : "スキャン結果を本部へ送信"}
+            {isSubmitting ? "送信中..." : "本部へ送信"}
             {!isSubmitting && <Send className="ml-2 h-4 w-4" />}
           </Button>
         </div>
@@ -152,7 +146,7 @@ export default function ScanSubmission() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalSKUs}</div>
+            <div className="text-2xl font-bold" data-testid="stat-total-sku">{stats.totalSKUs}</div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md shadow-black/5">
@@ -162,7 +156,7 @@ export default function ScanSubmission() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.floorCount}</div>
+            <div className="text-2xl font-bold" data-testid="stat-floor-sku">{stats.floorCount}</div>
           </CardContent>
         </Card>
         <Card className="border-none shadow-md shadow-black/5">
@@ -172,17 +166,27 @@ export default function ScanSubmission() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.backyardCount}</div>
+            <div className="text-2xl font-bold" data-testid="stat-backyard-sku">{stats.backyardCount}</div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-md shadow-black/5">
+        <Card className="border-none shadow-md shadow-black/5 border border-amber-200/60">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-500" /> 要確認 SKU数
+              <AlertCircle className="h-4 w-4 text-amber-500" /> 要確認SKU数
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{stats.unknownCount}</div>
+          <CardContent className="flex items-end justify-between">
+            <div className="text-2xl font-bold text-amber-600" data-testid="stat-unknown-sku">{stats.unknownCount}</div>
+            <Link href={`/store/${storeId}/analysis`}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs border-amber-300 text-amber-700 hover:bg-amber-50"
+                data-testid="button-goto-analysis"
+              >
+                詳細確認 <ArrowRight className="h-3 w-3 ml-1" />
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -197,7 +201,7 @@ export default function ScanSubmission() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-secondary/10">
-                  <TableHead className="w-[180px] font-bold">EPC</TableHead>
+                  <TableHead className="w-[160px] font-bold">EPC</TableHead>
                   <TableHead className="font-bold">商品名</TableHead>
                   <TableHead className="font-bold text-primary">計画ブロック</TableHead>
                   <TableHead className="font-bold">検出什器</TableHead>

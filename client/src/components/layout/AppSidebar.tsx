@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import {
-  Gauge, Map, ScanLine, LayoutGrid,
-  Building2, FileBarChart2, BarChart3, Layers,
+  Gauge, Map, ScanLine, LayoutGrid, Building2, BarChart3,
 } from "lucide-react";
 import { PlanoSIcon } from "@/components/ui/PlanoSIcon";
 import {
@@ -17,41 +16,47 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-const STORE_NAMES: Record<string, string> = {
-  "1": "渋谷店", "2": "新宿店", "3": "池袋店", "4": "横浜店",
-  "5": "川崎店", "6": "大宮店", "7": "千葉店", "8": "立川店",
-};
-
 function NavItem({
   href,
   icon: Icon,
   label,
   isActive,
   accent = false,
+  disabled = false,
 }: {
   href: string;
   icon: React.ElementType;
   label: string;
   isActive: boolean;
   accent?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        asChild
+        asChild={!disabled}
         isActive={isActive}
         className={`transition-all duration-150 rounded-lg ${
-          isActive
+          disabled
+            ? "opacity-40 cursor-not-allowed pointer-events-none"
+            : isActive
             ? accent
               ? "bg-accent/10 text-accent font-semibold"
               : "bg-primary/10 text-primary font-semibold"
             : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
         }`}
       >
-        <Link href={href} className="flex items-center gap-3 px-3 py-2.5">
-          <Icon className={`h-4 w-4 shrink-0 ${isActive ? (accent ? "text-accent" : "text-primary") : ""}`} />
-          <span className="text-[13px]">{label}</span>
-        </Link>
+        {disabled ? (
+          <span className="flex items-center gap-3 px-3 py-2.5">
+            <Icon className="h-4 w-4 shrink-0" />
+            <span className="text-[13px]">{label}</span>
+          </span>
+        ) : (
+          <Link href={href} className="flex items-center gap-3 px-3 py-2.5">
+            <Icon className={`h-4 w-4 shrink-0 ${isActive ? (accent ? "text-accent" : "text-primary") : ""}`} />
+            <span className="text-[13px]">{label}</span>
+          </Link>
+        )}
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -62,15 +67,15 @@ export function AppSidebar() {
 
   const storeMatch = location.match(/^\/store\/([^/]+)/);
   const currentStoreId = storeMatch ? storeMatch[1] : null;
-  const currentStoreName = currentStoreId ? (STORE_NAMES[currentStoreId] || "店舗") : null;
 
   const hq = (path: string) => location === path || (path === "/hq/dashboard" && location === "/");
 
-  const storeHref = (path: string) =>
-    currentStoreId ? `/store/${currentStoreId}/${path}` : "#";
-
   const storeActive = (path: string) =>
     currentStoreId ? location === `/store/${currentStoreId}/${path}` : false;
+
+  const isStoreDashActive =
+    location === "/hq/stores" ||
+    (!!currentStoreId && storeActive("summary"));
 
   return (
     <Sidebar variant="inset" className="border-r border-border/50 bg-sidebar/50 backdrop-blur-xl">
@@ -106,68 +111,55 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="text-[11px] font-bold tracking-widest text-accent/70 uppercase px-3 mb-1 flex items-center gap-1.5">
             <Building2 className="h-3 w-3" />
-            {currentStoreName ? `店舗 — ${currentStoreName}` : "店舗"}
+            店舗
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* 店舗ダッシュボード = 店舗一覧 (常に表示) */}
               <NavItem
-                href={currentStoreId ? `/store/${currentStoreId}/summary` : "/hq/stores"}
+                href="/hq/stores"
                 icon={Gauge}
-                label="ダッシュボード"
-                isActive={currentStoreId ? storeActive("summary") : location === "/hq/stores"}
+                label="店舗ダッシュボード"
+                isActive={isStoreDashActive}
                 accent
               />
-              <NavItem
-                href={currentStoreId ? `/store/${currentStoreId}/capacity` : "/hq/sv-capacity"}
-                icon={Layers}
-                label="店舗のキャパシティ管理"
-                isActive={currentStoreId ? storeActive("capacity") : location === "/hq/sv-capacity"}
-                accent
-              />
-              <NavItem
-                href={currentStoreId ? `/store/${currentStoreId}/analysis` : "/hq/stores"}
-                icon={FileBarChart2}
-                label="スキャン結果"
-                isActive={currentStoreId ? storeActive("analysis") : false}
-                accent
-              />
-              <NavItem
-                href={currentStoreId ? `/store/${currentStoreId}/scan` : "/hq/stores"}
-                icon={ScanLine}
-                label="スキャン送信"
-                isActive={currentStoreId ? storeActive("scan") : false}
-                accent
-              />
-              <NavItem
-                href={currentStoreId ? `/store/${currentStoreId}/plan` : "/hq/stores"}
-                icon={BarChart3}
-                label="今週の売場計画"
-                isActive={currentStoreId ? storeActive("plan") : false}
-                accent
-              />
-              <NavItem
-                href={currentStoreId ? `/store/${currentStoreId}/layout` : "/hq/stores"}
-                icon={LayoutGrid}
-                label="店舗レイアウト"
-                isActive={currentStoreId ? storeActive("layout") : false}
-                accent
-              />
+
+              {/* 店舗選択後のみ表示 */}
+              {currentStoreId && (
+                <>
+                  <NavItem
+                    href={`/store/${currentStoreId}/plan`}
+                    icon={BarChart3}
+                    label="今週の売場計画"
+                    isActive={storeActive("plan")}
+                    accent
+                  />
+                  <NavItem
+                    href={`/store/${currentStoreId}/layout`}
+                    icon={LayoutGrid}
+                    label="店舗レイアウト"
+                    isActive={storeActive("layout")}
+                    accent
+                  />
+                  <NavItem
+                    href={`/store/${currentStoreId}/scan`}
+                    icon={ScanLine}
+                    label="RFIDスキャン"
+                    isActive={storeActive("scan")}
+                    accent
+                  />
+                </>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Store context hint when not in a store */}
+        {/* 店舗未選択時のヒント */}
         {!currentStoreId && (
           <div className="mx-3 mt-2 rounded-lg bg-secondary/30 border border-border/40 px-3 py-2.5">
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              店舗一覧から店舗を選択すると、店舗メニューが有効になります。
+              店舗一覧から店舗を選択すると、店舗メニューが表示されます。
             </p>
-            <Link
-              href="/hq/stores"
-              className="text-[11px] text-primary font-semibold mt-1 inline-block hover:underline"
-            >
-              店舗一覧へ →
-            </Link>
           </div>
         )}
       </SidebarContent>

@@ -5,6 +5,7 @@ export interface Fixture {
   label: string;
   labelJp: string;
   type: "wall" | "island" | "counter";
+  zone: "HOT" | "MAIN" | "SALE";
   description: string;
   capacity: number;
   style: React.CSSProperties;
@@ -12,67 +13,64 @@ export interface Fixture {
 
 export const FIXTURES: Fixture[] = [
   {
-    id: "wall-a",
-    label: "Wall A",
-    labelJp: "バック壁面",
+    id: "wall-top",
+    label: "Wall Top",
+    labelJp: "上部壁面什器",
     type: "wall",
-    description: "後方メイン壁面。ブランドコアアイテムを展示する最も視認性の高いエリア。",
-    capacity: 60,
-    style: { top: "5%", left: "5%", width: "90%", height: "13%" },
+    zone: "HOT",
+    description: "上部壁面の主要展示エリア。最も視認性が高く、ホットブランドを配置します。",
+    capacity: 48,
+    style: { top: "27%", left: "38%", width: "44%", height: "9%" },
   },
   {
-    id: "wall-b",
-    label: "Wall B",
-    labelJp: "左壁面",
+    id: "wall-right",
+    label: "Wall Right",
+    labelJp: "右側壁面什器",
     type: "wall",
-    description: "左側壁面。サブブランドおよびサングラスコレクションを展示。",
+    zone: "HOT",
+    description: "右側壁面。サブホットブランドのフォーカス展示エリア。",
     capacity: 32,
-    style: { top: "20%", left: "5%", width: "9%", height: "58%" },
-  },
-  {
-    id: "wall-c",
-    label: "Wall C",
-    labelJp: "右壁面",
-    type: "wall",
-    description: "右側壁面。プレミアムおよびニッチブランドのフォーカス展示エリア。",
-    capacity: 28,
-    style: { top: "20%", right: "5%", width: "9%", height: "58%" },
+    style: { top: "27%", right: "0%", width: "9%", height: "52%" },
   },
   {
     id: "island-1",
     label: "Island 1",
-    labelJp: "センター島什器 1",
+    labelJp: "島什器 1",
     type: "island",
-    description: "中央前方島什器。新作・話題アイテムのフィーチャー展示。来店客が最初に触れるゾーン。",
+    zone: "MAIN",
+    description: "中央左島什器。メインブランドの展示エリア。来店客が触れやすいゾーン。",
     capacity: 24,
-    style: { top: "22%", left: "22%", width: "22%", height: "26%" },
+    style: { top: "39%", left: "21%", width: "27%", height: "30%" },
   },
   {
     id: "island-2",
     label: "Island 2",
-    labelJp: "センター島什器 2",
+    labelJp: "島什器 2",
     type: "island",
-    description: "中央後方島什器。セレクトコレクションおよびスタッフPickアイテムを展示。",
+    zone: "MAIN",
+    description: "中央右島什器。フィーチャーブランドおよびセレクト展示エリア。",
+    capacity: 24,
+    style: { top: "39%", left: "55%", width: "27%", height: "30%" },
+  },
+  {
+    id: "bottom-1",
+    label: "Bottom 1",
+    labelJp: "下部什器 1",
+    type: "island",
+    zone: "SALE",
+    description: "下部左什器。セール・定番ブランドの展示エリア。",
     capacity: 20,
-    style: { top: "54%", left: "22%", width: "22%", height: "24%" },
+    style: { top: "74%", left: "17%", width: "30%", height: "13%" },
   },
   {
-    id: "end-cap",
-    label: "End Cap",
-    labelJp: "エンド什器",
+    id: "bottom-2",
+    label: "Bottom 2",
+    labelJp: "下部什器 2",
     type: "island",
-    description: "中央右エンドキャップ。プロモーション品・期間限定展示に活用するフレキシブルゾーン。",
-    capacity: 16,
-    style: { top: "26%", left: "53%", width: "15%", height: "44%" },
-  },
-  {
-    id: "cashier",
-    label: "Cashier",
-    labelJp: "レジカウンター",
-    type: "counter",
-    description: "会計・サービスカウンター。レンズオーダー受付、小物販売、顧客対応を行うエリア。",
-    capacity: 10,
-    style: { top: "80%", left: "5%", width: "22%", height: "13%" },
+    zone: "SALE",
+    description: "下部右什器。シーズナル・セールブランドの展示エリア。",
+    capacity: 20,
+    style: { top: "74%", left: "55%", width: "30%", height: "13%" },
   },
 ];
 
@@ -95,23 +93,27 @@ export const BRAND_COLORS: Record<string, string> = {
 };
 
 const THIS_WEEK_INITIAL: Record<string, string[]> = {
-  "wall-a": ["AIR", "SUN", "GB"],
-  "wall-b": ["JD", "ES"],
-  "wall-c": ["NICHE", "KM"],
-  "island-1": ["MOVE", "JUNNI"],
-  "island-2": ["HP", "The ONE"],
-  "end-cap": ["BinB", "AIR"],
-  "cashier": ["雑貨"],
+  "wall-top":   ["AIR", "SUN"],
+  "wall-right": ["GB"],
+  "island-1":   ["JD", "ES"],
+  "island-2":   ["KM", "NICHE"],
+  "bottom-1":   ["MOVE", "JUNNI"],
+  "bottom-2":   ["雑貨"],
 };
 
 export const LAST_WEEK: Record<string, string[]> = {
-  "wall-a": ["AIR", "SUN"],
-  "wall-b": ["JD", "ES", "KM"],
-  "wall-c": ["NICHE", "GB"],
-  "island-1": ["MOVE"],
-  "island-2": ["HP", "JUNNI"],
-  "end-cap": ["AIR PLA", "AIR"],
-  "cashier": ["雑貨"],
+  "wall-top":   ["SUN", "AIR"],
+  "wall-right": ["GB", "KM"],
+  "island-1":   ["JD", "ES"],
+  "island-2":   ["NICHE"],
+  "bottom-1":   ["MOVE"],
+  "bottom-2":   ["雑貨", "JUNNI"],
+};
+
+export const ZONE_STYLES: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  HOT:  { label: "HOT",  bg: "bg-rose-50",   text: "text-rose-700",   border: "border-rose-200" },
+  MAIN: { label: "MAIN", bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200" },
+  SALE: { label: "SALE", bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
 };
 
 interface StorePlanContextType {

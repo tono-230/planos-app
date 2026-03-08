@@ -8,8 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRight, Pencil, Check, X, LayoutGrid } from "lucide-react";
-import { useStorePlan, FIXTURES, BRAND_COLORS, LAST_WEEK } from "@/context/StorePlanContext";
+import { ArrowRight, Pencil, Check, X } from "lucide-react";
+import { useStorePlan, FIXTURES, BRAND_COLORS, LAST_WEEK, ZONE_STYLES } from "@/context/StorePlanContext";
 
 const STORE_NAMES: Record<string, string> = {
   "1": "渋谷店", "2": "新宿店", "3": "池袋店", "4": "横浜店",
@@ -28,14 +28,6 @@ function getDiff(last: string[], curr: string[]): "added" | "removed" | "changed
   if (added && removed) return "changed";
   if (added) return "added";
   return "removed";
-}
-
-function BrandPill({ brand }: { brand: string }) {
-  return (
-    <span className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-bold text-white ${BRAND_COLORS[brand] || "bg-slate-400"}`}>
-      {brand}
-    </span>
-  );
 }
 
 function DiffBadge({ diff }: { diff: ReturnType<typeof getDiff> }) {
@@ -81,6 +73,9 @@ export default function StorePlan() {
 
   const editingFixture = editingId ? FIXTURES.find(f => f.id === editingId) : null;
 
+  const allAssigned = new Set(Object.values(assignments).flat());
+  const unassignedBrands = ALL_BRANDS.filter(b => !allAssigned.has(b));
+
   const changedCount = FIXTURES.filter(f => {
     const diff = getDiff(LAST_WEEK[f.id] ?? [], assignments[f.id] ?? []);
     return diff !== "same";
@@ -109,14 +104,31 @@ export default function StorePlan() {
         </div>
       </div>
 
+      {/* Unassigned brands strip */}
+      {unassignedBrands.length > 0 && (
+        <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">未割り当てブランド</p>
+          <div className="flex flex-wrap gap-1.5">
+            {unassignedBrands.map(b => (
+              <span
+                key={b}
+                className={`inline-flex items-center rounded px-2.5 py-1 text-xs font-bold text-white opacity-50 ${BRAND_COLORS[b] || "bg-slate-400"}`}
+                data-testid={`unassigned-brand-${b}`}
+              >
+                {b}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Week comparison table */}
       <div className="rounded-2xl border border-border/50 overflow-hidden shadow-sm">
         {/* Header */}
-        <div className="grid grid-cols-[1fr_1fr_1fr] bg-secondary/30 border-b border-border/40">
-          <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">什器</div>
-          <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider border-l border-border/40">
-            先週
-          </div>
+        <div className="grid grid-cols-[120px_1fr_1fr_1fr] bg-secondary/30 border-b border-border/40">
+          <div className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">ZONE</div>
+          <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider border-l border-border/40">什器</div>
+          <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider border-l border-border/40">先週</div>
           <div className="px-5 py-3 text-xs font-bold text-primary uppercase tracking-wider border-l border-border/40 flex items-center justify-between">
             <span>今週</span>
             <span className="text-muted-foreground normal-case font-normal text-[11px]">クリックで編集</span>
@@ -129,24 +141,34 @@ export default function StorePlan() {
           const currBrands = assignments[fixture.id] ?? [];
           const diff = getDiff(lastBrands, currBrands);
           const isSelected = selectedFixtureId === fixture.id;
+          const zoneStyle = ZONE_STYLES[fixture.zone];
 
           return (
             <div
               key={fixture.id}
-              className={`grid grid-cols-[1fr_1fr_1fr] border-b border-border/40 last:border-0 transition-colors ${
+              className={`grid grid-cols-[120px_1fr_1fr_1fr] border-b border-border/40 last:border-0 transition-colors ${
                 isSelected ? "bg-primary/5" : "hover:bg-secondary/10"
               }`}
             >
+              {/* Zone badge */}
+              <div className="px-4 py-4 flex items-start pt-5">
+                <span
+                  className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-black border ${zoneStyle.bg} ${zoneStyle.text} ${zoneStyle.border}`}
+                  data-testid={`zone-badge-${fixture.id}`}
+                >
+                  {fixture.zone}
+                </span>
+              </div>
+
               {/* Fixture name */}
               <button
-                className="px-5 py-4 text-left"
+                className="px-5 py-4 text-left border-l border-border/40"
                 onClick={() => setSelectedFixtureId(isSelected ? null : fixture.id)}
                 data-testid={`plan-row-${fixture.id}`}
               >
                 <div className="flex items-center gap-2.5">
                   <div className={`h-2 w-2 rounded-full shrink-0 ${
-                    fixture.type === "wall" ? "bg-slate-400" :
-                    fixture.type === "island" ? "bg-amber-400" : "bg-stone-400"
+                    fixture.type === "wall" ? "bg-slate-400" : "bg-amber-400"
                   }`} />
                   <div>
                     <p className="text-sm font-semibold text-foreground">{fixture.label}</p>
@@ -236,6 +258,7 @@ export default function StorePlan() {
                   <button
                     key={brand}
                     onClick={() => toggleBrand(brand)}
+                    data-testid={`brand-toggle-${brand}`}
                     className={`relative h-12 rounded-lg flex items-center justify-center text-sm font-bold text-white transition-all ${
                       BRAND_COLORS[brand] || "bg-slate-400"
                     } ${selected ? "ring-2 ring-offset-2 ring-foreground/30 scale-95" : "opacity-50 hover:opacity-80"}`}
@@ -253,7 +276,7 @@ export default function StorePlan() {
             <Button variant="outline" className="flex-1" onClick={() => setEditingId(null)}>
               <X className="h-4 w-4 mr-1" /> キャンセル
             </Button>
-            <Button className="flex-1" onClick={saveEdit}>
+            <Button className="flex-1" onClick={saveEdit} data-testid="button-save-brands">
               <Check className="h-4 w-4 mr-1" /> 保存
             </Button>
           </div>
