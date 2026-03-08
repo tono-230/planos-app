@@ -1,75 +1,152 @@
-import { useScans } from "@/hooks/use-scans";
-import { useAnalysis } from "@/hooks/use-analysis";
-import { usePlans } from "@/hooks/use-plans";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CheckCircle2, AlertCircle, Store, AlertTriangle, ArrowRight } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Activity, CheckCircle2, AlertCircle, Store, AlertTriangle, ArrowRight, Search } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-function KpiNumber({
-  primary,
-  unit,
-  secondary,
-  color,
-}: {
-  primary: string | number;
-  unit?: string;
-  secondary?: string;
-  color: string;
-}) {
-  return (
-    <div className="flex items-baseline gap-1.5 flex-wrap">
-      <span className={`text-5xl font-black leading-none tabular-nums ${color}`}>
-        {primary}
-      </span>
-      {unit && (
-        <span className={`text-2xl font-bold leading-none ${color} opacity-60`}>
-          {unit}
-        </span>
-      )}
-      {secondary && (
-        <span className={`text-sm font-semibold ${color} opacity-50 ml-0.5`}>
-          {secondary}
-        </span>
-      )}
-    </div>
-  );
-}
+import { DASHBOARD_STORES } from "@/data/stores";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const { data: scans, isLoading: isLoadingScans } = useScans();
-  const { data: analysis, isLoading: isLoadingAnalysis } = useAnalysis();
-  const { data: plans, isLoading: isLoadingPlans } = usePlans();
 
-  const isLoading = isLoadingScans || isLoadingAnalysis || isLoadingPlans;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [areaFilter, setAreaFilter] = useState("all");
+  const [svFilter, setSvFilter] = useState("all");
 
-  if (isLoading) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Activity className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground font-medium animate-pulse">読み込み中...</p>
-        </div>
-      </div>
-    );
-  }
+  const allCountries = useMemo(() => {
+    const set = new Set(DASHBOARD_STORES.map(s => s.country).filter(Boolean));
+    return Array.from(set).sort();
+  }, []);
 
-  const mockScannedStores = 420;
-  const mockTotalStores = 500;
-  const mockComplianceRate = 65;
-  const mockComplianceSku = 825;
-  const mockOverflowRate = 35;
-  const mockOverflowSku = 524;
+  const availableAreas = useMemo(() => {
+    const base = countryFilter === "all"
+      ? DASHBOARD_STORES
+      : DASHBOARD_STORES.filter(s => s.country === countryFilter);
+    const set = new Set(base.map(s => s.area).filter(Boolean));
+    return Array.from(set).sort();
+  }, [countryFilter]);
+
+  const availableSVs = useMemo(() => {
+    let base = countryFilter === "all"
+      ? DASHBOARD_STORES
+      : DASHBOARD_STORES.filter(s => s.country === countryFilter);
+    if (areaFilter !== "all") base = base.filter(s => s.area === areaFilter);
+    const set = new Set(base.map(s => s.sv).filter(Boolean));
+    return Array.from(set).sort();
+  }, [countryFilter, areaFilter]);
+
+  const filteredStores = useMemo(() => {
+    return DASHBOARD_STORES.filter(s => {
+      const matchSearch = !searchQuery || s.store_name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCountry = countryFilter === "all" || s.country === countryFilter;
+      const matchArea = areaFilter === "all" || s.area === areaFilter;
+      const matchSV = svFilter === "all" || s.sv === svFilter;
+      return matchSearch && matchCountry && matchArea && matchSV;
+    });
+  }, [searchQuery, countryFilter, areaFilter, svFilter]);
+
+  const kpi = useMemo(() => {
+    const total = filteredStores.length;
+    if (total === 0) return { scanned: 0, total: 0, complianceRate: 0, overflowRate: 0, complianceSku: 0, overflowSku: 0 };
+    const scanned = filteredStores.filter(s => s.scanned);
+    const scannedCount = scanned.length;
+    const avgCompliance = scannedCount > 0
+      ? Math.round(scanned.reduce((sum, s) => sum + s.complianceRate, 0) / scannedCount)
+      : 0;
+    const avgOverflow = scannedCount > 0
+      ? Math.round(scanned.reduce((sum, s) => sum + s.overflowRate, 0) / scannedCount)
+      : 0;
+    const avgCapacity = scannedCount > 0
+      ? Math.round(scanned.reduce((sum, s) => sum + s.max_capacity, 0) / scannedCount)
+      : 0;
+    const complianceSku = Math.round(avgCapacity * avgCompliance / 100);
+    const overflowSku = Math.round(avgCapacity * avgOverflow / 100);
+    return { scanned: scannedCount, total, complianceRate: avgCompliance, overflowRate: avgOverflow, complianceSku, overflowSku };
+  }, [filteredStores]);
+
+  const handleCountryChange = (val: string) => {
+    setCountryFilter(val);
+    setAreaFilter("all");
+    setSvFilter("all");
+  };
+
+  const handleAreaChange = (val: string) => {
+    setAreaFilter(val);
+    setSvFilter("all");
+  };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">ダッシュボード</h1>
         <p className="mt-2 text-muted-foreground">全店舗の棚割実行状況をリアルタイムで監視します</p>
       </div>
 
+      {/* Global Filter Bar */}
+      <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-secondary/20 rounded-xl border border-border/40">
+        <div className="relative flex-1 min-w-44">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            placeholder="店舗名で検索..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pl-9 bg-background h-9 text-sm"
+            data-testid="input-store-search"
+          />
+        </div>
+
+        <Select value={countryFilter} onValueChange={handleCountryChange}>
+          <SelectTrigger className="w-32 h-9 bg-background text-sm" data-testid="select-country">
+            <SelectValue placeholder="全国" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">全国</SelectItem>
+            {allCountries.map(c => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={areaFilter} onValueChange={handleAreaChange}>
+          <SelectTrigger className="w-36 h-9 bg-background text-sm" data-testid="select-area">
+            <SelectValue placeholder="全エリア" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">全エリア</SelectItem>
+            {availableAreas.map(a => (
+              <SelectItem key={a} value={a}>{a}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={svFilter} onValueChange={setSvFilter}>
+          <SelectTrigger className="w-36 h-9 bg-background text-sm" data-testid="select-sv">
+            <SelectValue placeholder="全SV" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">全SV</SelectItem>
+            {availableSVs.map(sv => (
+              <SelectItem key={sv} value={sv}>{sv}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <div className="ml-auto text-sm font-semibold text-foreground tabular-nums whitespace-nowrap" data-testid="text-store-count">
+          <span className="text-primary">{filteredStores.length.toLocaleString()}</span>
+          <span className="text-muted-foreground"> / {DASHBOARD_STORES.length.toLocaleString()} 店舗</span>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* 1. スキャン店舗数 */}
         <Card
@@ -84,20 +161,20 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black leading-none tabular-nums text-blue-600">
-                {mockScannedStores}
+              <span className="text-5xl font-black leading-none tabular-nums text-blue-600" data-testid="value-scanned-stores">
+                {kpi.scanned}
               </span>
               <span className="text-xl font-semibold text-blue-400 leading-none">
-                / {mockTotalStores}
+                / {kpi.total}
               </span>
             </div>
-            {mockScannedStores < mockTotalStores && (
+            {kpi.scanned < kpi.total && (
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
                 未完了
               </Badge>
             )}
             <p className="text-xs text-muted-foreground/70 font-medium">
-              スキャン済み店舗 / 全対象店舗
+              スキャン済み店舗 / 対象店舗数
             </p>
           </CardContent>
         </Card>
@@ -114,17 +191,15 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="text-5xl font-black leading-none tabular-nums text-emerald-600">
-                {mockComplianceRate}
+              <span className="text-5xl font-black leading-none tabular-nums text-emerald-600" data-testid="value-compliance-rate">
+                {kpi.complianceRate}
               </span>
-              <span className="text-2xl font-bold leading-none text-emerald-500 opacity-70">
-                %
-              </span>
+              <span className="text-2xl font-bold leading-none text-emerald-500 opacity-70">%</span>
               <span className="text-sm font-semibold text-emerald-700 opacity-50 ml-0.5">
-                {mockComplianceSku.toLocaleString()} SKU
+                {kpi.complianceSku.toLocaleString()} SKU
               </span>
             </div>
-            {mockComplianceRate < 80 && (
+            {kpi.complianceRate < 80 && kpi.total > 0 && (
               <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
                 要改善
               </Badge>
@@ -147,17 +222,15 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="text-5xl font-black leading-none tabular-nums text-orange-600">
-                {mockOverflowRate}
+              <span className="text-5xl font-black leading-none tabular-nums text-orange-600" data-testid="value-overflow-rate">
+                {kpi.overflowRate}
               </span>
-              <span className="text-2xl font-bold leading-none text-orange-500 opacity-70">
-                %
-              </span>
+              <span className="text-2xl font-bold leading-none text-orange-500 opacity-70">%</span>
               <span className="text-sm font-semibold text-orange-700 opacity-50 ml-0.5">
-                {mockOverflowSku.toLocaleString()} SKU
+                {kpi.overflowSku.toLocaleString()} SKU
               </span>
             </div>
-            {mockOverflowRate > 20 && (
+            {kpi.overflowRate > 20 && kpi.total > 0 && (
               <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
                 キャパ超過
               </Badge>
@@ -169,66 +242,77 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Next Actions */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold tracking-tight">次のアクション</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {mockScannedStores < mockTotalStores && (
-            <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2 text-blue-600">
-                  <Store className="h-5 w-5" />
-                  <CardTitle className="text-base">店舗スキャン待ち</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">未スキャン店舗があります。RFIDスキャンデータを送信してください。</p>
-                <Button asChild size="sm" variant="outline" className="w-full justify-between">
-                  <Link href="/hq/stores" className="flex items-center justify-between w-full">
-                    店舗一覧へ <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+        {kpi.total === 0 ? (
+          <p className="text-sm text-muted-foreground py-4">フィルター条件に一致する店舗がありません。</p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-3">
+            {kpi.scanned < kpi.total && (
+              <Card className="border-border/50 shadow-sm" data-testid="action-scan-pending">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2 text-blue-600">
+                    <Store className="h-5 w-5" />
+                    <CardTitle className="text-base">店舗スキャン待ち</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-bold text-blue-600">{kpi.total - kpi.scanned}</span> 店舗が未スキャンです。RFIDスキャンデータを送信してください。
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="w-full justify-between">
+                    <Link href="/hq/stores" className="flex items-center justify-between w-full">
+                      店舗一覧へ <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-          {mockOverflowRate > 20 && (
-            <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2 text-orange-600">
-                  <AlertTriangle className="h-5 w-5" />
-                  <CardTitle className="text-base">売場キャパ超過</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">一部SKUが売場キャパを超えています。SKU削減または売場再配置を検討してください。</p>
-                <Button asChild size="sm" variant="outline" className="w-full justify-between">
-                  <Link href="/hq/stores" className="flex items-center justify-between w-full">
-                    店舗一覧へ <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+            {kpi.overflowRate > 20 && (
+              <Card className="border-border/50 shadow-sm" data-testid="action-overflow">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2 text-orange-600">
+                    <AlertTriangle className="h-5 w-5" />
+                    <CardTitle className="text-base">売場キャパ超過</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    平均オーバーフロー率 <span className="font-bold text-orange-600">{kpi.overflowRate}%</span>。SKU削減または売場再配置を検討してください。
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="w-full justify-between">
+                    <Link href="/hq/stores" className="flex items-center justify-between w-full">
+                      店舗一覧へ <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-          {mockComplianceRate < 100 && (
-            <Card className="border-border/50 shadow-sm">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2 text-destructive">
-                  <AlertCircle className="h-5 w-5" />
-                  <CardTitle className="text-base">棚割差異確認</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">計画と異なる配置が検出されています。売場配置を確認してください。</p>
-                <Button asChild size="sm" variant="outline" className="w-full justify-between">
-                  <Link href="/hq/stores" className="flex items-center justify-between w-full">
-                    店舗一覧へ <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+            {kpi.complianceRate < 100 && kpi.scanned > 0 && (
+              <Card className="border-border/50 shadow-sm" data-testid="action-compliance">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <AlertCircle className="h-5 w-5" />
+                    <CardTitle className="text-base">棚割差異確認</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    遵守率 <span className="font-bold text-destructive">{kpi.complianceRate}%</span>。計画と異なる配置が検出されています。
+                  </p>
+                  <Button asChild size="sm" variant="outline" className="w-full justify-between">
+                    <Link href="/hq/stores" className="flex items-center justify-between w-full">
+                      店舗一覧へ <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
