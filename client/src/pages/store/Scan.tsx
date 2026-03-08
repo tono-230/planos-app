@@ -3,8 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin, Warehouse, ArrowRight } from "lucide-react";
+import {
+  ScanLine, Send, CheckCircle2, AlertCircle, Package, MapPin,
+  Warehouse, ArrowRight, AlertTriangle, X,
+} from "lucide-react";
 import { Link, useParams } from "wouter";
 
 const STORE_NAMES: Record<string, string> = {
@@ -57,6 +67,7 @@ export default function ScanSubmission() {
   const { toast } = useToast();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [analysisOpen, setAnalysisOpen] = useState(false);
   const scanData = useMemo(() => generateMockScans(), []);
 
   const stats = useMemo(() => {
@@ -67,28 +78,30 @@ export default function ScanSubmission() {
     return { totalSKUs, floorCount, backyardCount, unknownCount };
   }, [scanData]);
 
+  const unknownItems = useMemo(
+    () => scanData.filter(s => s.comparison === "要確認"),
+    [scanData],
+  );
+
   const handleSubmit = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
-      toast({
-        title: "送信完了",
-        description: "RFIDスキャン結果を本部へ送信しました。",
-      });
+      toast({ title: "送信完了", description: "RFIDスキャン結果を本部へ送信しました。" });
     }, 1500);
   };
 
   const getComparisonBadge = (comparison: string) => {
     switch (comparison) {
       case "計画通り":
-        return <Badge className="bg-emerald-500 hover:bg-emerald-600 gap-1">計画通り</Badge>;
+        return <Badge className="bg-emerald-500 hover:bg-emerald-600">計画通り</Badge>;
       case "未展開":
-        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-500/20 gap-1">未展開</Badge>;
+        return <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 border-yellow-500/20">未展開</Badge>;
       case "誤配置":
-        return <Badge className="bg-orange-500 hover:bg-orange-600 gap-1">誤配置</Badge>;
+        return <Badge className="bg-orange-500 hover:bg-orange-600">誤配置</Badge>;
       case "要確認":
-        return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600 gap-1">要確認</Badge>;
+        return <Badge variant="destructive" className="bg-red-500 hover:bg-red-600">要確認</Badge>;
       default:
         return <Badge variant="outline">{comparison}</Badge>;
     }
@@ -96,6 +109,7 @@ export default function ScanSubmission() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -138,6 +152,7 @@ export default function ScanSubmission() {
         </div>
       </div>
 
+      {/* KPI cards */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="border-none shadow-md shadow-black/5 bg-primary/5">
           <CardHeader className="pb-2">
@@ -149,6 +164,7 @@ export default function ScanSubmission() {
             <div className="text-2xl font-bold" data-testid="stat-total-sku">{stats.totalSKUs}</div>
           </CardContent>
         </Card>
+
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -159,6 +175,7 @@ export default function ScanSubmission() {
             <div className="text-2xl font-bold" data-testid="stat-floor-sku">{stats.floorCount}</div>
           </CardContent>
         </Card>
+
         <Card className="border-none shadow-md shadow-black/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -169,28 +186,32 @@ export default function ScanSubmission() {
             <div className="text-2xl font-bold" data-testid="stat-backyard-sku">{stats.backyardCount}</div>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-md shadow-black/5 border border-amber-200/60">
+
+        {/* 要確認 card — opens lightbox */}
+        <Card className="border border-amber-200/80 shadow-md shadow-black/5 bg-amber-50/40">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-500" /> 要確認SKU数
+              <AlertTriangle className="h-4 w-4 text-amber-500" /> 要確認SKU数
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex items-end justify-between">
-            <div className="text-2xl font-bold text-amber-600" data-testid="stat-unknown-sku">{stats.unknownCount}</div>
-            <Link href={`/store/${storeId}/analysis`}>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 text-xs border-amber-300 text-amber-700 hover:bg-amber-50"
-                data-testid="button-goto-analysis"
-              >
-                詳細確認 <ArrowRight className="h-3 w-3 ml-1" />
-              </Button>
-            </Link>
+          <CardContent className="flex items-end justify-between gap-2">
+            <div className="text-2xl font-bold text-amber-600" data-testid="stat-unknown-sku">
+              {stats.unknownCount}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs border-amber-300 text-amber-700 hover:bg-amber-100 shrink-0"
+              onClick={() => setAnalysisOpen(true)}
+              data-testid="button-goto-analysis"
+            >
+              詳細確認 <ArrowRight className="h-3 w-3 ml-1" />
+            </Button>
           </CardContent>
         </Card>
       </div>
 
+      {/* Scan results table */}
       <Card className="border-border/50 shadow-xl shadow-black/5 overflow-hidden">
         <CardHeader className="bg-secondary/30 border-b border-border/40">
           <CardTitle>スキャン結果詳細（棚割比較）</CardTitle>
@@ -233,9 +254,7 @@ export default function ScanSubmission() {
                     <TableCell>
                       <span className="text-xs text-muted-foreground">{scan.status}</span>
                     </TableCell>
-                    <TableCell>
-                      {getComparisonBadge(scan.comparison)}
-                    </TableCell>
+                    <TableCell>{getComparisonBadge(scan.comparison)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -243,6 +262,74 @@ export default function ScanSubmission() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 要確認 SKU lightbox dialog */}
+      <Dialog open={analysisOpen} onOpenChange={setAnalysisOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-700">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              要確認SKU — スキャン結果詳細
+            </DialogTitle>
+            <DialogDescription>
+              位置が特定できなかったSKUの一覧です。売場確認または在庫確認が必要です。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-center gap-3 px-1 py-2 bg-amber-50 rounded-lg border border-amber-200">
+            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+            <p className="text-sm text-amber-800 font-medium">
+              {unknownItems.length} 件の要確認SKUが見つかりました。早急な対応を推奨します。
+            </p>
+          </div>
+
+          <div className="overflow-auto flex-1 rounded-lg border border-border/50">
+            <Table>
+              <TableHeader className="sticky top-0 bg-secondary/80 backdrop-blur-sm">
+                <TableRow>
+                  <TableHead className="font-bold">商品名</TableHead>
+                  <TableHead className="font-bold w-[130px]">SKU</TableHead>
+                  <TableHead className="font-bold text-primary">計画ブロック</TableHead>
+                  <TableHead className="font-bold">検出什器</TableHead>
+                  <TableHead className="font-bold">検出状態</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {unknownItems.map((scan) => (
+                  <TableRow key={scan.id} className="hover:bg-amber-50/50 transition-colors">
+                    <TableCell>
+                      <span className="font-semibold text-sm">{scan.name}</span>
+                    </TableCell>
+                    <TableCell className="font-mono text-[11px] text-muted-foreground">
+                      {scan.sku}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-bold border-primary/20 text-primary text-[11px]">
+                        {scan.plannedBlock}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <MapPin className="h-3 w-3 text-amber-500" />
+                        {scan.fixture}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-xs text-muted-foreground">{scan.status}</span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <Button variant="outline" onClick={() => setAnalysisOpen(false)} data-testid="button-close-analysis">
+              <X className="h-4 w-4 mr-1.5" /> 閉じる
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

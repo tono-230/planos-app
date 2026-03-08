@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import {
-  Gauge, Map, ScanLine, LayoutGrid, Building2, BarChart3,
+  Gauge, Map, ScanLine, LayoutGrid, Building2, BarChart3, Landmark,
 } from "lucide-react";
 import { PlanoSIcon } from "@/components/ui/PlanoSIcon";
 import {
@@ -92,7 +92,8 @@ export function AppSidebar() {
       <SidebarContent className="px-2 space-y-1">
         {/* 本部 section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[11px] font-bold tracking-widest text-primary/60 uppercase px-3 mb-1">
+          <SidebarGroupLabel className="text-[11px] font-bold tracking-widest text-primary/60 uppercase px-3 mb-1 flex items-center gap-1.5">
+            <Landmark className="h-3 w-3" />
             本部
           </SidebarGroupLabel>
           <SidebarGroupContent>
