@@ -11,7 +11,7 @@ function MobileStoreNav() {
   const storeId = storeMatch[1];
 
   const tabs = [
-    { href: `/store/${storeId}/plan`,   icon: BarChart3,  label: "売場計画"    },
+    { href: `/store/${storeId}/plan`,   icon: BarChart3,  label: "VMD計画"    },
     { href: `/store/${storeId}/layout`, icon: LayoutGrid, label: "レイアウト"  },
     { href: `/store/${storeId}/scan`,   icon: ScanLine,   label: "RFIDスキャン" },
   ];

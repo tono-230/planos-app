@@ -14,9 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { HQ_GROUPS, HQ_VARIANTS, HQ_THIS_WEEK, HQ_LAST_WEEK } from "@/context/StorePlanContext";
 
-const GROUPS = ["Hot spot", "Sub hot", "Main", "定番", "Feature", "Seasonal", "Sale"] as const;
-const VARIANTS = ["A", "B"] as const;
+const GROUPS = HQ_GROUPS;
+const VARIANTS = HQ_VARIANTS;
 const POSITIONS = GROUPS.flatMap(g => VARIANTS.map(v => `${g} ${v}`));
 
 const BRAND_COLORS: Record<string, string> = {
@@ -71,25 +72,6 @@ const BRAND_ANALYTICS: Record<string, BrandAnalytics> = {
   "雑貨":       { lastWeekSales: 145, weekOverWeek: 7.6,  salesRank: 6,  trend: "up",   comment: "衝動買い需要が高い。レジ付近への配置が効果的です。",           stock: 203, weekSales: 24, stockWeeks: 8.5 },
 };
 
-const LAST_WEEK: Record<string, string> = {
-  "Hot spot A": "AIR",     "Hot spot B": "SUN",
-  "Sub hot A":  "GB",      "Sub hot B":  "JD",
-  "Main A":     "ES",      "Main B":     "KM",
-  "定番 A":      "NICHE",   "定番 B":     "MOVE",
-  "Feature A":  "JUNNI",   "Feature B":  "HP",
-  "Seasonal A": "The ONE", "Seasonal B": "BinB",
-  "Sale A":     "雑貨",    "Sale B":     "",
-};
-
-const THIS_WEEK_INIT: Record<string, string> = {
-  "Hot spot A": "AIR",     "Hot spot B": "KM",
-  "Sub hot A":  "GB",      "Sub hot B":  "JD",
-  "Main A":     "SUN",     "Main B":     "KM",
-  "定番 A":      "NICHE",   "定番 B":     "MOVE",
-  "Feature A":  "JUNNI",   "Feature B":  "The ONE",
-  "Seasonal A": "",        "Seasonal B": "BinB",
-  "Sale A":     "雑貨",    "Sale B":     "AIR PLA",
-};
 
 type DiffType = "same" | "empty" | "added" | "removed" | "changed";
 
@@ -140,7 +122,7 @@ function LastWeekCell({ pos, onSelect, currentWeekBrands }: {
   onSelect: (pos: string) => void;
   currentWeekBrands: Record<string, string>;
 }) {
-  const brand = LAST_WEEK[pos] || "";
+  const brand = HQ_LAST_WEEK[pos] || "";
   const currBrand = currentWeekBrands[pos] || "";
   const diff = getDiff(brand, currBrand);
   const faded = diff === "changed" || diff === "removed";
@@ -179,7 +161,7 @@ function ThisWeekCell({ pos, brands, onEdit }: {
   onEdit: (pos: string) => void;
 }) {
   const currBrand = brands[pos] || "";
-  const lastBrand = LAST_WEEK[pos] || "";
+  const lastBrand = HQ_LAST_WEEK[pos] || "";
   const diff = getDiff(lastBrand, currBrand);
 
   const ringClass =
@@ -236,7 +218,7 @@ export default function PlanManager() {
   const { toast } = useToast();
   const { data: products, isLoading: loadingProds } = useProducts();
 
-  const [thisWeek, setThisWeek] = useState<Record<string, string>>(THIS_WEEK_INIT);
+  const [thisWeek, setThisWeek] = useState<Record<string, string>>(HQ_THIS_WEEK);
   const [editingPos, setEditingPos] = useState<string | null>(null);
   const [analyticsPos, setAnalyticsPos] = useState<string | null>(null);
 
@@ -248,7 +230,7 @@ export default function PlanManager() {
   };
 
   const changedPositions = POSITIONS.filter(pos => {
-    const diff = getDiff(LAST_WEEK[pos] || "", thisWeek[pos] || "");
+    const diff = getDiff(HQ_LAST_WEEK[pos] || "", thisWeek[pos] || "");
     return diff !== "same" && diff !== "empty";
   });
 
@@ -256,7 +238,7 @@ export default function PlanManager() {
   const allBrands = products?.map(p => p.name) ?? Object.keys(BRAND_COLORS);
   const unassignedBrands = allBrands.filter(b => !assignedBrands.has(b));
 
-  const analyticsBrand = analyticsPos ? (LAST_WEEK[analyticsPos] || "") : "";
+  const analyticsBrand = analyticsPos ? (HQ_LAST_WEEK[analyticsPos] || "") : "";
   const analyticsData = analyticsBrand ? BRAND_ANALYTICS[analyticsBrand] : null;
 
   if (loadingProds) {
@@ -272,7 +254,7 @@ export default function PlanManager() {
       {/* Page header */}
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">今週の売場計画</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">今週のVMD指示</h1>
           <p className="mt-2 text-muted-foreground">
             <span className="text-muted-foreground/70">先週セル</span>をクリックで詳細分析、
             <span className="text-primary font-medium">今週セル</span>をクリックで編集。

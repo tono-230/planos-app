@@ -9,26 +9,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ArrowRight, Pencil, Check, X, MessageSquare } from "lucide-react";
-import { useStorePlan, FIXTURES, BRAND_COLORS, LAST_WEEK, ZONE_STYLES } from "@/context/StorePlanContext";
+import { useStorePlan, FIXTURES, BRAND_COLORS, LAST_WEEK, ZONE_STYLES, HQ_THIS_WEEK } from "@/context/StorePlanContext";
 import type { Fixture } from "@/context/StorePlanContext";
 
-const HQ_TAG_STYLES: Record<string, string> = {
-  "新作":   "bg-emerald-100 text-emerald-700 border-emerald-200",
-  "強化展開": "bg-blue-100 text-blue-700 border-blue-200",
-  "定番":   "bg-slate-100 text-slate-600 border-slate-200",
-  "フェア": "bg-amber-100 text-amber-700 border-amber-200",
-  "セール": "bg-rose-100 text-rose-700 border-rose-200",
-};
-
 function HqInstructionCell({ fixture }: { fixture: Fixture }) {
+  const entries = fixture.positions.map(pos => ({
+    pos,
+    brand: HQ_THIS_WEEK[pos] || "",
+  }));
   return (
     <div className="space-y-1.5">
-      <span className={`inline-flex items-center text-[10px] font-black border rounded px-1.5 py-0.5 ${HQ_TAG_STYLES[fixture.hqInstructionTag] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
-        {fixture.hqInstructionTag}
-      </span>
-      <p className="text-[11px] text-muted-foreground leading-relaxed">
-        {fixture.hqInstruction}
-      </p>
+      {entries.map(({ pos, brand }) => (
+        <div key={pos} className="flex items-center gap-2 flex-wrap">
+          <span className="text-[10px] text-muted-foreground/70 font-medium whitespace-nowrap">{pos}</span>
+          {brand ? (
+            <span className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-black text-white ${BRAND_COLORS[brand] || "bg-slate-400"}`}>
+              {brand}
+            </span>
+          ) : (
+            <span className="text-[10px] text-muted-foreground/40 italic">未割当</span>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
@@ -112,11 +114,11 @@ export default function StorePlan() {
           <span>/</span>
           <Link href={`/store/${storeId}/summary`} className="hover:text-foreground transition-colors">{storeName}</Link>
           <span>/</span>
-          <span className="text-foreground font-medium">今週の売場計画</span>
+          <span className="text-foreground font-medium">今週のVMD計画</span>
         </div>
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">今週の売場計画</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">今週のVMD計画</h1>
             <p className="mt-1.5 text-sm text-muted-foreground hidden md:block">先週と今週の什器ブランド割り付けを確認・編集します。</p>
           </div>
           {changedCount > 0 && (
@@ -185,14 +187,9 @@ export default function StorePlan() {
               <div className="px-4 py-3 border-b border-border/30 bg-primary/[0.02]" data-testid={`hq-instruction-mobile-${fixture.id}`}>
                 <div className="flex items-start gap-2">
                   <MessageSquare className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-[10px] font-bold text-primary uppercase tracking-wider">本部指示</p>
-                      <span className={`text-[10px] font-black border rounded px-1.5 py-0.5 ${HQ_TAG_STYLES[fixture.hqInstructionTag] ?? "bg-slate-100 text-slate-600 border-slate-200"}`}>
-                        {fixture.hqInstructionTag}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{fixture.hqInstruction}</p>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-wider">本部指示</p>
+                    <HqInstructionCell fixture={fixture} />
                   </div>
                 </div>
               </div>

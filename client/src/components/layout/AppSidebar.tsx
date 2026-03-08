@@ -99,7 +99,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <NavItem href="/hq/dashboard" icon={Gauge} label="ダッシュボード" isActive={hq("/hq/dashboard")} />
-              <NavItem href="/hq/plan" icon={Map} label="今週の売場計画" isActive={hq("/hq/plan")} />
+              <NavItem href="/hq/plan" icon={Map} label="今週のVMD指示" isActive={hq("/hq/plan")} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -131,7 +131,7 @@ export function AppSidebar() {
                   <NavItem
                     href={`/store/${currentStoreId}/plan`}
                     icon={BarChart3}
-                    label="今週の売場計画"
+                    label="今週のVMD計画"
                     isActive={storeActive("plan")}
                     accent
                   />
