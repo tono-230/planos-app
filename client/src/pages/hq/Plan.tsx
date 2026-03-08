@@ -6,13 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   Check, ArrowRight, Pencil, TrendingUp, TrendingDown, Minus,
-  BarChart2, Package
+  BarChart2, Package, Send, Store
 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { HQ_GROUPS, HQ_VARIANTS, HQ_THIS_WEEK, HQ_LAST_WEEK } from "@/context/StorePlanContext";
 
@@ -221,6 +223,22 @@ export default function PlanManager() {
   const [thisWeek, setThisWeek] = useState<Record<string, string>>(HQ_THIS_WEEK);
   const [editingPos, setEditingPos] = useState<string | null>(null);
   const [analyticsPos, setAnalyticsPos] = useState<string | null>(null);
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const handleSend = () => {
+    setSending(true);
+    setTimeout(() => {
+      setSending(false);
+      setSendDialogOpen(false);
+    }, 800);
+    setTimeout(() => {
+      toast({
+        title: "VMD指示を送信しました",
+        description: "全8店舗にVMD指示が送信されました。",
+      });
+    }, 900);
+  };
 
   const handleAssignBrand = (brand: string) => {
     if (!editingPos) return;
@@ -252,7 +270,7 @@ export default function PlanManager() {
   return (
     <div className="space-y-5 animate-in fade-in duration-500">
       {/* Page header */}
-      <div className="flex items-end justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">今週のVMD指示</h1>
           <p className="mt-2 text-muted-foreground">
@@ -260,11 +278,21 @@ export default function PlanManager() {
             <span className="text-primary font-medium">今週セル</span>をクリックで編集。
           </p>
         </div>
-        {changedPositions.length > 0 && (
-          <Badge className="bg-amber-100 text-amber-700 border-amber-200 border text-xs font-semibold px-3 py-1.5">
-            {changedPositions.length} 件の変更
-          </Badge>
-        )}
+        <div className="flex items-center gap-2 shrink-0 mt-1">
+          {changedPositions.length > 0 && (
+            <Badge className="bg-amber-100 text-amber-700 border-amber-200 border text-xs font-semibold px-3 py-1.5">
+              {changedPositions.length} 件の変更
+            </Badge>
+          )}
+          <Button
+            onClick={() => setSendDialogOpen(true)}
+            className="gap-2"
+            data-testid="button-send-to-stores"
+          >
+            <Send className="h-4 w-4" />
+            店舗に送信
+          </Button>
+        </div>
       </div>
 
       {/* Unassigned brands strip */}
@@ -508,6 +536,52 @@ export default function PlanManager() {
           >
             未割り当てにする
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send to stores confirmation dialog */}
+      <Dialog open={sendDialogOpen} onOpenChange={open => !open && setSendDialogOpen(false)}>
+        <DialogContent className="sm:max-w-[460px]" data-testid="send-dialog">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-primary" />
+              VMD指示を店舗に送信
+            </DialogTitle>
+            <DialogDescription>
+              今週のVMD指示を全店舗に送信します。送信後、各店舗のVMD計画ページに反映されます。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-3 space-y-3">
+            <div className="rounded-lg border border-border/40 bg-secondary/20 p-4 space-y-2">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">送信内容</p>
+              <div className="grid grid-cols-2 gap-y-1.5 text-sm">
+                {Object.entries(thisWeek).filter(([, b]) => b).map(([pos, brand]) => (
+                  <div key={pos} className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground w-24 shrink-0">{pos}</span>
+                    <span className={`inline-block rounded px-2 py-0.5 text-[11px] font-black text-white ${BRAND_COLORS[brand] || "bg-slate-400"}`}>
+                      {brand}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="rounded-lg border border-border/40 bg-secondary/20 px-4 py-3 flex items-center gap-2.5">
+              <Store className="h-4 w-4 text-muted-foreground shrink-0" />
+              <p className="text-sm text-muted-foreground">送信先: <span className="font-semibold text-foreground">全8店舗</span></p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setSendDialogOpen(false)} disabled={sending} data-testid="button-send-cancel">
+              キャンセル
+            </Button>
+            <Button onClick={handleSend} disabled={sending} className="gap-2" data-testid="button-send-confirm">
+              {sending ? (
+                <>送信中...</>
+              ) : (
+                <><Send className="h-4 w-4" />送信する</>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
