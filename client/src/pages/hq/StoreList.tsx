@@ -133,7 +133,7 @@ export default function StoreList() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-[10px] text-muted-foreground font-medium">オーバーフロー率</div>
+                          <div className="text-[10px] text-muted-foreground font-medium">キャパ超過率</div>
                           <div className={`font-black text-lg ${store.overflow! > 20 ? "text-orange-600" : "text-blue-600"}`}>
                             {store.overflow}%
                           </div>

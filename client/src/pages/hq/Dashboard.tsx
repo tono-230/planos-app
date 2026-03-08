@@ -210,14 +210,14 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* 3. オーバーフロー率 */}
+        {/* 3. キャパ超過率 */}
         <Card
           className="border-none shadow-md shadow-black/5 cursor-pointer hover:bg-orange-500/[0.02] transition-colors"
           onClick={() => setLocation("/hq/stores")}
           data-testid="kpi-overflow"
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-muted-foreground">オーバーフロー率</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">キャパ超過率</CardTitle>
             <AlertTriangle className="h-5 w-5 text-orange-500" />
           </CardHeader>
           <CardContent className="space-y-3">
@@ -280,7 +280,7 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    平均オーバーフロー率 <span className="font-bold text-orange-600">{kpi.overflowRate}%</span>。SKU削減または売場再配置を検討してください。
+                    平均キャパ超過率 <span className="font-bold text-orange-600">{kpi.overflowRate}%</span>。SKU削減または売場再配置を検討してください。
                   </p>
                   <Button asChild size="sm" variant="outline" className="w-full justify-between">
                     <Link href="/hq/stores" className="flex items-center justify-between w-full">
