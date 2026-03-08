@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, Map, Store, ScanLine, LayoutGrid,
+  LayoutDashboard, Map, ScanLine, LayoutGrid,
   Building2, FileBarChart2, BarChart3, Layers,
 } from "lucide-react";
+import { PlanoSIcon } from "@/components/ui/PlanoSIcon";
 import {
   Sidebar,
   SidebarContent,
@@ -75,12 +76,10 @@ export function AppSidebar() {
     <Sidebar variant="inset" className="border-r border-border/50 bg-sidebar/50 backdrop-blur-xl">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3 px-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 text-primary-foreground">
-            <Store className="h-5 w-5" />
-          </div>
+          <PlanoSIcon size={40} className="shrink-0 shadow-lg shadow-primary/25 rounded-[10px]" />
           <div className="flex flex-col">
-            <span className="font-display text-lg font-bold leading-tight">PlanoSense</span>
-            <span className="text-xs font-medium text-muted-foreground">店舗オペレーション</span>
+            <span className="font-display text-lg font-black leading-tight tracking-tight">PlanoS</span>
+            <span className="text-[11px] font-medium text-muted-foreground leading-tight">Planogram Simulation</span>
           </div>
         </div>
       </SidebarHeader>
