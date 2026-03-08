@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, Map, ScanLine, LayoutGrid,
+  Gauge, Map, ScanLine, LayoutGrid,
   Building2, FileBarChart2, BarChart3, Layers,
 } from "lucide-react";
 import { PlanoSIcon } from "@/components/ui/PlanoSIcon";
@@ -92,7 +92,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <NavItem href="/hq/dashboard" icon={LayoutDashboard} label="ダッシュボード" isActive={hq("/hq/dashboard")} />
+              <NavItem href="/hq/dashboard" icon={Gauge} label="ダッシュボード" isActive={hq("/hq/dashboard")} />
               <NavItem href="/hq/plan" icon={Map} label="今週の売場計画" isActive={hq("/hq/plan")} />
             </SidebarMenu>
           </SidebarGroupContent>
@@ -112,7 +112,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <NavItem
                 href={currentStoreId ? `/store/${currentStoreId}/summary` : "/hq/stores"}
-                icon={LayoutDashboard}
+                icon={Gauge}
                 label="ダッシュボード"
                 isActive={currentStoreId ? storeActive("summary") : location === "/hq/stores"}
                 accent
