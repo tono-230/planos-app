@@ -7,6 +7,36 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+function KpiNumber({
+  primary,
+  unit,
+  secondary,
+  color,
+}: {
+  primary: string | number;
+  unit?: string;
+  secondary?: string;
+  color: string;
+}) {
+  return (
+    <div className="flex items-baseline gap-1.5 flex-wrap">
+      <span className={`text-5xl font-black leading-none tabular-nums ${color}`}>
+        {primary}
+      </span>
+      {unit && (
+        <span className={`text-2xl font-bold leading-none ${color} opacity-60`}>
+          {unit}
+        </span>
+      )}
+      {secondary && (
+        <span className={`text-sm font-semibold ${color} opacity-50 ml-0.5`}>
+          {secondary}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { data: scans, isLoading: isLoadingScans } = useScans();
@@ -26,12 +56,6 @@ export default function Dashboard() {
     );
   }
 
-  const totalScans = scans?.length || 0;
-  const totalPlanned = plans?.length || 0;
-  
-  const mismatchCount = analysis?.filter(a => a.status === 'mismatch').length || 0;
-  const missingCount = analysis?.filter(a => a.status === 'missing').length || 0;
-
   const mockScannedStores = 420;
   const mockTotalStores = 500;
   const mockComplianceRate = 65;
@@ -47,74 +71,98 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {/* 1. スキャン店舗数 (Blue) */}
-        <Card 
+        {/* 1. スキャン店舗数 */}
+        <Card
           className="border-none shadow-md shadow-black/5 overflow-hidden relative group cursor-pointer hover:bg-blue-500/[0.02] transition-colors"
           onClick={() => setLocation("/hq/stores")}
+          data-testid="kpi-scanned-stores"
         >
           <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">スキャン店舗数</CardTitle>
             <Store className="h-5 w-5 text-blue-500" />
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="text-4xl font-black font-display text-blue-600">{mockScannedStores} / {mockTotalStores}</div>
+          <CardContent className="space-y-3">
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl font-black leading-none tabular-nums text-blue-600">
+                {mockScannedStores}
+              </span>
+              <span className="text-xl font-semibold text-blue-400 leading-none">
+                / {mockTotalStores}
+              </span>
+            </div>
             {mockScannedStores < mockTotalStores && (
               <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
                 未完了
               </Badge>
             )}
-            <p className="text-xs text-muted-foreground/70 font-medium pt-1">
+            <p className="text-xs text-muted-foreground/70 font-medium">
               スキャン済み店舗 / 全対象店舗
             </p>
           </CardContent>
         </Card>
 
-        {/* 2. 棚割遵守率 (Green) */}
-        <Card 
+        {/* 2. 棚割遵守率 */}
+        <Card
           className="border-none shadow-md shadow-black/5 cursor-pointer hover:bg-emerald-500/[0.02] transition-colors"
           onClick={() => setLocation("/hq/stores")}
+          data-testid="kpi-compliance"
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">棚割遵守率</CardTitle>
             <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-baseline gap-2">
-              <div className="text-4xl font-black font-display text-emerald-600">{mockComplianceRate}%</div>
-              <div className="text-lg font-bold text-emerald-600/80">{mockComplianceSku} SKU</div>
+          <CardContent className="space-y-3">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="text-5xl font-black leading-none tabular-nums text-emerald-600">
+                {mockComplianceRate}
+              </span>
+              <span className="text-2xl font-bold leading-none text-emerald-500 opacity-70">
+                %
+              </span>
+              <span className="text-sm font-semibold text-emerald-700 opacity-50 ml-0.5">
+                {mockComplianceSku.toLocaleString()} SKU
+              </span>
             </div>
             {mockComplianceRate < 80 && (
               <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
                 要改善
               </Badge>
             )}
-            <p className="text-xs text-muted-foreground/70 font-medium pt-1">
+            <p className="text-xs text-muted-foreground/70 font-medium">
               計画通りに展開されているSKU
             </p>
           </CardContent>
         </Card>
 
-        {/* 3. オーバーフロー率 (Orange) */}
-        <Card 
+        {/* 3. オーバーフロー率 */}
+        <Card
           className="border-none shadow-md shadow-black/5 cursor-pointer hover:bg-orange-500/[0.02] transition-colors"
           onClick={() => setLocation("/hq/stores")}
+          data-testid="kpi-overflow"
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">オーバーフロー率</CardTitle>
             <AlertTriangle className="h-5 w-5 text-orange-500" />
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="flex items-baseline gap-2">
-              <div className="text-4xl font-black font-display text-orange-600">{mockOverflowRate}%</div>
-              <div className="text-lg font-bold text-orange-600/80">{mockOverflowSku} SKU</div>
+          <CardContent className="space-y-3">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="text-5xl font-black leading-none tabular-nums text-orange-600">
+                {mockOverflowRate}
+              </span>
+              <span className="text-2xl font-bold leading-none text-orange-500 opacity-70">
+                %
+              </span>
+              <span className="text-sm font-semibold text-orange-700 opacity-50 ml-0.5">
+                {mockOverflowSku.toLocaleString()} SKU
+              </span>
             </div>
             {mockOverflowRate > 20 && (
               <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
                 キャパ超過
               </Badge>
             )}
-            <p className="text-xs text-muted-foreground/70 font-medium pt-1">
+            <p className="text-xs text-muted-foreground/70 font-medium">
               売場キャパを超えているSKU
             </p>
           </CardContent>

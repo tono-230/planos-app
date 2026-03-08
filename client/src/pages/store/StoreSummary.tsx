@@ -4,7 +4,12 @@ import { CheckCircle2, AlertTriangle, XCircle, Store, ArrowRight } from "lucide-
 import { Link, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 
-const MOCK_STORE_DATA: Record<string, { name: string; area: string; compliance: number; complianceSku: number; overflow: number; overflowSku: number; scanned: boolean }> = {
+const MOCK_STORE_DATA: Record<string, {
+  name: string; area: string;
+  compliance: number; complianceSku: number;
+  overflow: number; overflowSku: number;
+  scanned: boolean;
+}> = {
   "1": { name: "渋谷店", area: "東京エリア", compliance: 82, complianceSku: 820, overflow: 12, overflowSku: 148, scanned: true },
   "2": { name: "新宿店", area: "東京エリア", compliance: 65, complianceSku: 825, overflow: 35, overflowSku: 524, scanned: true },
   "3": { name: "池袋店", area: "東京エリア", compliance: 0, complianceSku: 0, overflow: 0, overflowSku: 0, scanned: false },
@@ -34,12 +39,12 @@ export default function StoreSummary() {
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* スキャン状況 */}
-        <Card className="border-none shadow-md shadow-black/5 overflow-hidden relative group">
+        <Card className="border-none shadow-md shadow-black/5 overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">スキャン状況</CardTitle>
             <Store className={`h-5 w-5 ${store.scanned ? 'text-emerald-500' : 'text-amber-500'}`} />
           </CardHeader>
-          <CardContent className="space-y-1">
+          <CardContent className="space-y-2">
             <div className={`text-3xl font-black font-display ${store.scanned ? 'text-emerald-600' : 'text-amber-600'}`}>
               {store.scanned ? 'スキャン済み' : '未スキャン'}
             </div>
@@ -50,17 +55,24 @@ export default function StoreSummary() {
         </Card>
 
         {/* 棚割遵守率 */}
-        <Card className="border-none shadow-md shadow-black/5">
+        <Card className="border-none shadow-md shadow-black/5" data-testid="kpi-store-compliance">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">棚割遵守率</CardTitle>
             <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
             {store.scanned ? (
               <>
-                <div className="flex items-baseline gap-2">
-                  <div className="text-3xl font-black font-display text-emerald-600">{store.compliance}%</div>
-                  <div className="text-base font-bold text-emerald-600/80">{store.complianceSku} SKU</div>
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                  <span className="text-5xl font-black leading-none tabular-nums text-emerald-600">
+                    {store.compliance}
+                  </span>
+                  <span className="text-2xl font-bold leading-none text-emerald-500 opacity-70">
+                    %
+                  </span>
+                  <span className="text-sm font-semibold text-emerald-700 opacity-50 ml-0.5">
+                    {store.complianceSku.toLocaleString()} SKU
+                  </span>
                 </div>
                 {store.compliance < 80 && (
                   <Badge variant="secondary" className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
@@ -71,24 +83,31 @@ export default function StoreSummary() {
             ) : (
               <div className="text-2xl font-black font-display text-muted-foreground">データ未取得</div>
             )}
-            <p className="text-xs text-muted-foreground/70 font-medium pt-1">
+            <p className="text-xs text-muted-foreground/70 font-medium">
               計画通りに展開されているSKU
             </p>
           </CardContent>
         </Card>
 
         {/* オーバーフロー率 */}
-        <Card className="border-none shadow-md shadow-black/5">
+        <Card className="border-none shadow-md shadow-black/5" data-testid="kpi-store-overflow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium text-muted-foreground">オーバーフロー率</CardTitle>
             <AlertTriangle className="h-5 w-5 text-orange-500" />
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
             {store.scanned ? (
               <>
-                <div className="flex items-baseline gap-2">
-                  <div className="text-3xl font-black font-display text-orange-600">{store.overflow}%</div>
-                  <div className="text-base font-bold text-orange-600/80">{store.overflowSku} SKU</div>
+                <div className="flex items-baseline gap-1.5 flex-wrap">
+                  <span className="text-5xl font-black leading-none tabular-nums text-orange-600">
+                    {store.overflow}
+                  </span>
+                  <span className="text-2xl font-bold leading-none text-orange-500 opacity-70">
+                    %
+                  </span>
+                  <span className="text-sm font-semibold text-orange-700 opacity-50 ml-0.5">
+                    {store.overflowSku.toLocaleString()} SKU
+                  </span>
                 </div>
                 {store.overflow > 20 && (
                   <Badge variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-none text-[10px] py-0 px-2 h-5 font-bold">
@@ -99,7 +118,7 @@ export default function StoreSummary() {
             ) : (
               <div className="text-2xl font-black font-display text-muted-foreground">データ未取得</div>
             )}
-            <p className="text-xs text-muted-foreground/70 font-medium pt-1">
+            <p className="text-xs text-muted-foreground/70 font-medium">
               売場キャパを超えているSKU
             </p>
           </CardContent>
@@ -116,7 +135,7 @@ export default function StoreSummary() {
           <CardContent className="space-y-2">
             <Button asChild variant="outline" size="sm" className="w-full justify-between">
               <Link href={`/store/${storeId}/analysis`} className="flex items-center justify-between w-full">
-                実行分析を確認 <ArrowRight className="h-4 w-4" />
+                スキャン結果を確認 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="sm" className="w-full justify-between">
