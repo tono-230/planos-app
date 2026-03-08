@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import {
   Check, ArrowRight, Pencil, TrendingUp, TrendingDown, Minus,
-  BarChart2, Package, X, Search
+  BarChart2, Package
 } from "lucide-react";
 import {
   Dialog,
@@ -110,7 +110,14 @@ function BrandTag({ name, faded = false, small = false }: { name: string; faded?
   );
 }
 
-function TrendBadge({ trend }: { trend: Trend }) {
+function TrendIcon({ trend, size = "sm" }: { trend: Trend; size?: "sm" | "xs" }) {
+  const cls = size === "xs" ? "h-2.5 w-2.5" : "h-3.5 w-3.5";
+  if (trend === "up")   return <TrendingUp   className={`${cls} text-emerald-500`} />;
+  if (trend === "down") return <TrendingDown className={`${cls} text-rose-500`} />;
+  return <Minus className={`${cls} text-muted-foreground`} />;
+}
+
+function TrendLabel({ trend }: { trend: Trend }) {
   if (trend === "up") return (
     <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
       <TrendingUp className="h-3.5 w-3.5" />上昇
@@ -128,9 +135,8 @@ function TrendBadge({ trend }: { trend: Trend }) {
   );
 }
 
-function LastWeekCell({ pos, isSelected, onSelect, currentWeekBrands }: {
+function LastWeekCell({ pos, onSelect, currentWeekBrands }: {
   pos: string;
-  isSelected: boolean;
   onSelect: (pos: string) => void;
   currentWeekBrands: Record<string, string>;
 }) {
@@ -138,26 +144,31 @@ function LastWeekCell({ pos, isSelected, onSelect, currentWeekBrands }: {
   const currBrand = currentWeekBrands[pos] || "";
   const diff = getDiff(brand, currBrand);
   const faded = diff === "changed" || diff === "removed";
+  const a = brand ? BRAND_ANALYTICS[brand] : null;
 
   return (
     <button
-      className={`group relative flex flex-col items-center justify-center h-16 w-full rounded-xl border px-2 transition-all cursor-pointer
-        ${isSelected
-          ? "border-primary/60 bg-primary/5 ring-2 ring-primary/20 ring-offset-1"
-          : "border-border/30 bg-secondary/30 hover:bg-secondary/60 hover:border-border/60 hover:shadow-sm"
-        }`}
+      className="group relative flex flex-col items-center justify-center gap-1 h-20 w-full rounded-xl border border-border/30 bg-secondary/30 px-2 py-2 transition-all cursor-pointer hover:bg-secondary/60 hover:border-border/60 hover:shadow-sm"
       onClick={() => onSelect(pos)}
       data-testid={`cell-lastweek-${pos.replace(/\s/g, "-")}`}
     >
       {brand ? (
-        <BrandTag name={brand} faded={faded} />
+        <>
+          <BrandTag name={brand} faded={faded} />
+          {a && (
+            <div className="flex items-center gap-1 text-[9px] font-semibold">
+              <TrendIcon trend={a.trend} size="xs" />
+              <span className={a.weekOverWeek >= 0 ? "text-emerald-600" : "text-rose-500"}>
+                {a.weekOverWeek >= 0 ? "+" : ""}{a.weekOverWeek}%
+              </span>
+              <span className="text-muted-foreground/40">|</span>
+              <span className="text-muted-foreground/70">¥{a.lastWeekSales}万</span>
+            </div>
+          )}
+        </>
       ) : (
         <span className="text-[10px] text-muted-foreground/30 italic">未割り当て</span>
       )}
-      <div className={`absolute bottom-1 flex items-center gap-0.5 transition-opacity ${isSelected ? "opacity-60" : "opacity-0 group-hover:opacity-60"}`}>
-        <Search className="h-2.5 w-2.5 text-muted-foreground" />
-        <span className="text-[8px] text-muted-foreground">分析</span>
-      </div>
     </button>
   );
 }
@@ -188,7 +199,7 @@ function ThisWeekCell({ pos, brands, onEdit }: {
 
   return (
     <button
-      className={`group relative flex flex-col items-center justify-center h-16 w-full rounded-xl border border-border/30 px-2 gap-0.5 transition-all hover:shadow-md hover:border-primary/30 hover:bg-primary/[0.02] cursor-pointer bg-secondary/30 ${ringClass}`}
+      className={`group relative flex flex-col items-center justify-center h-20 w-full rounded-xl border border-border/30 px-2 gap-0.5 transition-all hover:shadow-md hover:border-primary/30 hover:bg-primary/[0.02] cursor-pointer bg-secondary/30 ${ringClass}`}
       onClick={() => onEdit(pos)}
       data-testid={`cell-thisweek-${pos.replace(/\s/g, "-")}`}
     >
@@ -221,113 +232,19 @@ function ThisWeekCell({ pos, brands, onEdit }: {
   );
 }
 
-function AnalyticsPanel({ pos, brand, onClose }: { pos: string; brand: string; onClose: () => void }) {
-  const a = BRAND_ANALYTICS[brand];
-
-  return (
-    <div className="rounded-2xl border border-primary/20 bg-card shadow-md animate-in slide-in-from-bottom-2 duration-200" data-testid="analytics-panel">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/40">
-        <div className="flex items-center gap-3">
-          {brand && <BrandTag name={brand} />}
-          <div>
-            <p className="text-sm font-bold text-foreground">{pos}</p>
-            <p className="text-xs text-muted-foreground">先週の実績データ</p>
-          </div>
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1.5 rounded-lg hover:bg-secondary transition-colors"
-          data-testid="analytics-panel-close"
-        >
-          <X className="h-4 w-4 text-muted-foreground" />
-        </button>
-      </div>
-
-      {a ? (
-        <div className="grid grid-cols-3 divide-x divide-border/40 px-0">
-          {/* 売上動向 */}
-          <div className="px-5 py-4 space-y-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              <BarChart2 className="h-3.5 w-3.5" />売上動向
-            </div>
-            <div className="space-y-2.5">
-              <div>
-                <p className="text-[10px] text-muted-foreground">先週売上</p>
-                <p className="text-xl font-black text-foreground">¥{a.lastWeekSales}<span className="text-sm font-normal text-muted-foreground ml-0.5">万</span></p>
-              </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground">前週比</p>
-                <p className={`text-base font-bold ${a.weekOverWeek >= 0 ? "text-emerald-600" : "text-rose-500"}`}>
-                  {a.weekOverWeek >= 0 ? "+" : ""}{a.weekOverWeek}%
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground">売れ筋順位</p>
-                <p className="text-base font-bold text-foreground">#{a.salesRank}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* 傾向 */}
-          <div className="px-5 py-4 space-y-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              <TrendingUp className="h-3.5 w-3.5" />傾向
-            </div>
-            <div className="space-y-2.5">
-              <TrendBadge trend={a.trend} />
-              <p className="text-xs text-muted-foreground leading-relaxed">{a.comment}</p>
-            </div>
-          </div>
-
-          {/* 在庫 */}
-          <div className="px-5 py-4 space-y-3">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              <Package className="h-3.5 w-3.5" />在庫
-            </div>
-            <div className="space-y-2.5">
-              <div>
-                <p className="text-[10px] text-muted-foreground">現在庫</p>
-                <p className="text-xl font-black text-foreground">{a.stock}<span className="text-sm font-normal text-muted-foreground ml-0.5">点</span></p>
-              </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground">週販</p>
-                <p className="text-base font-bold text-foreground">{a.weekSales}<span className="text-xs text-muted-foreground ml-0.5">点/週</span></p>
-              </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground">在庫週数</p>
-                <p className={`text-base font-bold ${a.stockWeeks < 3 ? "text-rose-500" : a.stockWeeks < 5 ? "text-amber-500" : "text-foreground"}`}>
-                  {a.stockWeeks.toFixed(1)}<span className="text-xs text-muted-foreground ml-0.5">週</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-          このロケーションのデータはありません
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function PlanManager() {
   const { toast } = useToast();
   const { data: products, isLoading: loadingProds } = useProducts();
 
   const [thisWeek, setThisWeek] = useState<Record<string, string>>(THIS_WEEK_INIT);
   const [editingPos, setEditingPos] = useState<string | null>(null);
-  const [selectedLastWeekPos, setSelectedLastWeekPos] = useState<string | null>(null);
+  const [analyticsPos, setAnalyticsPos] = useState<string | null>(null);
 
   const handleAssignBrand = (brand: string) => {
     if (!editingPos) return;
     setThisWeek(prev => ({ ...prev, [editingPos]: brand }));
     toast({ title: "更新完了", description: `${editingPos} に ${brand || "未割り当て"} を設定しました。` });
     setEditingPos(null);
-  };
-
-  const handleSelectLastWeek = (pos: string) => {
-    setSelectedLastWeekPos(prev => prev === pos ? null : pos);
   };
 
   const changedPositions = POSITIONS.filter(pos => {
@@ -339,6 +256,9 @@ export default function PlanManager() {
   const allBrands = products?.map(p => p.name) ?? Object.keys(BRAND_COLORS);
   const unassignedBrands = allBrands.filter(b => !assignedBrands.has(b));
 
+  const analyticsBrand = analyticsPos ? (LAST_WEEK[analyticsPos] || "") : "";
+  const analyticsData = analyticsBrand ? BRAND_ANALYTICS[analyticsBrand] : null;
+
   if (loadingProds) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -347,8 +267,6 @@ export default function PlanManager() {
     );
   }
 
-  const selectedBrand = selectedLastWeekPos ? (LAST_WEEK[selectedLastWeekPos] || "") : "";
-
   return (
     <div className="space-y-5 animate-in fade-in duration-500">
       {/* Page header */}
@@ -356,7 +274,7 @@ export default function PlanManager() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">今週の売場計画</h1>
           <p className="mt-2 text-muted-foreground">
-            <span className="text-muted-foreground/70">先週セル</span>をクリックで分析表示、
+            <span className="text-muted-foreground/70">先週セル</span>をクリックで詳細分析、
             <span className="text-primary font-medium">今週セル</span>をクリックで編集。
           </p>
         </div>
@@ -394,9 +312,7 @@ export default function PlanManager() {
           <CardHeader className="pb-2 pt-4 px-5">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">先週</CardTitle>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <Search className="h-3 w-3" />クリックで分析表示
-              </span>
+              <span className="text-[10px] text-muted-foreground">クリックで詳細分析</span>
             </div>
           </CardHeader>
           <CardContent className="px-5 pb-5">
@@ -415,8 +331,7 @@ export default function PlanManager() {
                   <LastWeekCell
                     key={`${group} ${v}`}
                     pos={`${group} ${v}`}
-                    isSelected={selectedLastWeekPos === `${group} ${v}`}
-                    onSelect={handleSelectLastWeek}
+                    onSelect={setAnalyticsPos}
                     currentWeekBrands={thisWeek}
                   />
                 ))}
@@ -461,15 +376,6 @@ export default function PlanManager() {
         </Card>
       </div>
 
-      {/* Analytics detail panel */}
-      {selectedLastWeekPos && (
-        <AnalyticsPanel
-          pos={selectedLastWeekPos}
-          brand={selectedBrand}
-          onClose={() => setSelectedLastWeekPos(null)}
-        />
-      )}
-
       {/* Diff summary */}
       {changedPositions.length > 0 && (
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
@@ -499,6 +405,94 @@ export default function PlanManager() {
           <span>削除</span>
         </div>
       </div>
+
+      {/* Analytics lightbox */}
+      <Dialog open={!!analyticsPos} onOpenChange={open => !open && setAnalyticsPos(null)}>
+        <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden" data-testid="analytics-dialog">
+          <DialogHeader className="px-6 pt-5 pb-4 border-b border-border/40">
+            <DialogTitle className="flex items-center gap-3 text-base">
+              {analyticsBrand && <BrandTag name={analyticsBrand} />}
+              <span>{analyticsPos}</span>
+              <span className="text-muted-foreground font-normal text-sm">— 先週の実績</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {analyticsData ? (
+            <div className="grid grid-cols-3 divide-x divide-border/40">
+              {/* 売上動向 */}
+              <div className="px-5 py-5 space-y-4">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  <BarChart2 className="h-3.5 w-3.5" />売上動向
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">先週売上</p>
+                    <p className="text-2xl font-black text-foreground leading-none">
+                      ¥{analyticsData.lastWeekSales}
+                      <span className="text-sm font-normal text-muted-foreground ml-1">万</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">前週比</p>
+                    <p className={`text-lg font-bold leading-none ${analyticsData.weekOverWeek >= 0 ? "text-emerald-600" : "text-rose-500"}`}>
+                      {analyticsData.weekOverWeek >= 0 ? "+" : ""}{analyticsData.weekOverWeek}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">売れ筋順位</p>
+                    <p className="text-lg font-bold text-foreground leading-none">#{analyticsData.salesRank}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 傾向 */}
+              <div className="px-5 py-5 space-y-4">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  <TrendingUp className="h-3.5 w-3.5" />傾向
+                </div>
+                <div className="space-y-3">
+                  <TrendLabel trend={analyticsData.trend} />
+                  <p className="text-xs text-muted-foreground leading-relaxed">{analyticsData.comment}</p>
+                </div>
+              </div>
+
+              {/* 在庫 */}
+              <div className="px-5 py-5 space-y-4">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  <Package className="h-3.5 w-3.5" />在庫
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">現在庫</p>
+                    <p className="text-2xl font-black text-foreground leading-none">
+                      {analyticsData.stock}
+                      <span className="text-sm font-normal text-muted-foreground ml-1">点</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">週販</p>
+                    <p className="text-lg font-bold text-foreground leading-none">
+                      {analyticsData.weekSales}
+                      <span className="text-xs text-muted-foreground ml-1">点/週</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground mb-0.5">在庫週数</p>
+                    <p className={`text-lg font-bold leading-none ${analyticsData.stockWeeks < 3 ? "text-rose-500" : analyticsData.stockWeeks < 5 ? "text-amber-500" : "text-foreground"}`}>
+                      {analyticsData.stockWeeks.toFixed(1)}
+                      <span className="text-xs text-muted-foreground ml-1">週</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="px-6 py-10 text-center text-sm text-muted-foreground">
+              このロケーションのデータはありません
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Brand picker dialog */}
       <Dialog open={!!editingPos} onOpenChange={open => !open && setEditingPos(null)}>
