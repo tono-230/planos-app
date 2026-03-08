@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ArrowRight, Pencil, Check, X } from "lucide-react";
+import { ArrowRight, Pencil, Check, X, ChevronRight } from "lucide-react";
 import { useStorePlan, FIXTURES, BRAND_COLORS, LAST_WEEK, ZONE_STYLES } from "@/context/StorePlanContext";
 
 const STORE_NAMES: Record<string, string> = {
@@ -82,7 +82,8 @@ export default function StorePlan() {
   }).length;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-5 animate-in fade-in duration-500">
+      {/* Page header */}
       <div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
           <Link href="/hq/stores" className="hover:text-foreground transition-colors">店舗一覧</Link>
@@ -91,13 +92,13 @@ export default function StorePlan() {
           <span>/</span>
           <span className="text-foreground font-medium">今週の売場計画</span>
         </div>
-        <div className="flex items-end justify-between">
+        <div className="flex items-end justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">今週の売場計画</h1>
-            <p className="mt-2 text-muted-foreground">先週と今週の什器ブランド割り付けを確認・編集します。</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">今週の売場計画</h1>
+            <p className="mt-1.5 text-sm text-muted-foreground hidden md:block">先週と今週の什器ブランド割り付けを確認・編集します。</p>
           </div>
           {changedCount > 0 && (
-            <Badge className="bg-amber-100 text-amber-700 border-amber-200 border text-xs font-semibold px-3 py-1.5">
+            <Badge className="bg-amber-100 text-amber-700 border-amber-200 border text-xs font-semibold px-3 py-1.5 shrink-0">
               {changedCount} 件の変更
             </Badge>
           )}
@@ -122,9 +123,85 @@ export default function StorePlan() {
         </div>
       )}
 
-      {/* Week comparison table */}
-      <div className="rounded-2xl border border-border/50 overflow-hidden shadow-sm">
-        {/* Header */}
+      {/* ── Mobile: card list ── */}
+      <div className="md:hidden space-y-3">
+        {FIXTURES.map(fixture => {
+          const lastBrands = LAST_WEEK[fixture.id] ?? [];
+          const currBrands = assignments[fixture.id] ?? [];
+          const diff = getDiff(lastBrands, currBrands);
+          const zoneStyle = ZONE_STYLES[fixture.zone];
+
+          return (
+            <div
+              key={fixture.id}
+              className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden"
+              data-testid={`plan-card-${fixture.id}`}
+            >
+              {/* Card header */}
+              <div className={`px-4 py-3 flex items-center justify-between border-b border-border/40 ${zoneStyle.bg}`}>
+                <div className="flex items-center gap-2.5">
+                  <span className={`text-[11px] font-black border rounded px-2 py-0.5 ${zoneStyle.bg} ${zoneStyle.text} ${zoneStyle.border}`}>
+                    {fixture.zone}
+                  </span>
+                  <div>
+                    <p className="text-base font-bold text-foreground leading-tight">{fixture.label}</p>
+                    <p className="text-xs text-muted-foreground leading-tight">{fixture.labelJp}</p>
+                  </div>
+                  {diff !== "same" && <DiffBadge diff={diff} />}
+                </div>
+                <button
+                  onClick={() => openEdit(fixture.id)}
+                  className="flex items-center gap-1.5 rounded-lg bg-white/60 border border-border/40 px-3 py-2 text-sm font-semibold text-foreground active:bg-white/90 transition-colors"
+                  data-testid={`edit-fixture-${fixture.id}`}
+                >
+                  <Pencil className="h-4 w-4" />
+                  編集
+                </button>
+              </div>
+
+              {/* Current brands */}
+              <div className="px-4 py-3.5">
+                <p className="text-[11px] font-semibold text-muted-foreground mb-2 uppercase tracking-wider">今週</p>
+                <div className="flex flex-wrap gap-2">
+                  {currBrands.length > 0 ? currBrands.map(b => {
+                    const isNew = !lastBrands.includes(b);
+                    return (
+                      <span
+                        key={b}
+                        className={`inline-flex items-center rounded-md px-3 py-1.5 text-sm font-bold text-white ${BRAND_COLORS[b] || "bg-slate-400"} ${isNew ? "ring-2 ring-offset-1 ring-emerald-400" : ""}`}
+                      >
+                        {b}
+                      </span>
+                    );
+                  }) : (
+                    <span className="text-sm text-muted-foreground/60 italic">未割り当て</span>
+                  )}
+                </div>
+
+                {/* Changed brands from last week */}
+                {lastBrands.length > 0 && diff !== "same" && (
+                  <div className="mt-2.5 pt-2.5 border-t border-border/30">
+                    <p className="text-[11px] font-semibold text-muted-foreground mb-1.5 uppercase tracking-wider">先週</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {lastBrands.map(b => (
+                        <span
+                          key={b}
+                          className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-bold text-white opacity-50 ${BRAND_COLORS[b] || "bg-slate-400"} ${!currBrands.includes(b) ? "line-through opacity-30" : ""}`}
+                        >
+                          {b}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── Desktop: table ── */}
+      <div className="hidden md:block rounded-2xl border border-border/50 overflow-hidden shadow-sm">
         <div className="grid grid-cols-[120px_1fr_1fr_1fr] bg-secondary/30 border-b border-border/40">
           <div className="px-4 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider">ZONE</div>
           <div className="px-5 py-3 text-xs font-bold text-muted-foreground uppercase tracking-wider border-l border-border/40">什器</div>
@@ -135,7 +212,6 @@ export default function StorePlan() {
           </div>
         </div>
 
-        {/* Rows */}
         {FIXTURES.map(fixture => {
           const lastBrands = LAST_WEEK[fixture.id] ?? [];
           const currBrands = assignments[fixture.id] ?? [];
@@ -150,26 +226,18 @@ export default function StorePlan() {
                 isSelected ? "bg-primary/5" : "hover:bg-secondary/10"
               }`}
             >
-              {/* Zone badge */}
               <div className="px-4 py-4 flex items-start pt-5">
-                <span
-                  className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-black border ${zoneStyle.bg} ${zoneStyle.text} ${zoneStyle.border}`}
-                  data-testid={`zone-badge-${fixture.id}`}
-                >
+                <span className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-black border ${zoneStyle.bg} ${zoneStyle.text} ${zoneStyle.border}`} data-testid={`zone-badge-${fixture.id}`}>
                   {fixture.zone}
                 </span>
               </div>
-
-              {/* Fixture name */}
               <button
                 className="px-5 py-4 text-left border-l border-border/40"
                 onClick={() => setSelectedFixtureId(isSelected ? null : fixture.id)}
                 data-testid={`plan-row-${fixture.id}`}
               >
                 <div className="flex items-center gap-2.5">
-                  <div className={`h-2 w-2 rounded-full shrink-0 ${
-                    fixture.type === "wall" ? "bg-slate-400" : "bg-amber-400"
-                  }`} />
+                  <div className={`h-2 w-2 rounded-full shrink-0 ${fixture.type === "wall" ? "bg-slate-400" : "bg-amber-400"}`} />
                   <div>
                     <p className="text-sm font-semibold text-foreground">{fixture.label}</p>
                     <p className="text-[11px] text-muted-foreground">{fixture.labelJp}</p>
@@ -177,40 +245,18 @@ export default function StorePlan() {
                   {diff !== "same" && <DiffBadge diff={diff} />}
                 </div>
               </button>
-
-              {/* Last week */}
               <div className="px-5 py-4 border-l border-border/40 flex flex-wrap gap-1.5 items-start content-start">
                 {lastBrands.length > 0 ? lastBrands.map(b => (
-                  <span
-                    key={b}
-                    className={`text-[11px] font-bold text-white rounded px-1.5 py-0.5 opacity-60 ${BRAND_COLORS[b] || "bg-slate-400"} ${
-                      !currBrands.includes(b) ? "line-through opacity-40" : ""
-                    }`}
-                  >
-                    {b}
-                  </span>
-                )) : (
-                  <span className="text-xs text-muted-foreground/50 italic">未割り当て</span>
-                )}
+                  <span key={b} className={`text-[11px] font-bold text-white rounded px-1.5 py-0.5 opacity-60 ${BRAND_COLORS[b] || "bg-slate-400"} ${!currBrands.includes(b) ? "line-through opacity-40" : ""}`}>{b}</span>
+                )) : <span className="text-xs text-muted-foreground/50 italic">未割り当て</span>}
               </div>
-
-              {/* This week — editable */}
               <div className="px-5 py-4 border-l border-border/40 flex flex-wrap gap-1.5 items-start content-start group relative">
                 {currBrands.length > 0 ? currBrands.map(b => {
                   const isNew = !lastBrands.includes(b);
                   return (
-                    <span
-                      key={b}
-                      className={`text-[11px] font-bold text-white rounded px-1.5 py-0.5 ${BRAND_COLORS[b] || "bg-slate-400"} ${
-                        isNew ? "ring-2 ring-offset-1 ring-emerald-400" : ""
-                      }`}
-                    >
-                      {b}
-                    </span>
+                    <span key={b} className={`text-[11px] font-bold text-white rounded px-1.5 py-0.5 ${BRAND_COLORS[b] || "bg-slate-400"} ${isNew ? "ring-2 ring-offset-1 ring-emerald-400" : ""}`}>{b}</span>
                   );
-                }) : (
-                  <span className="text-xs text-muted-foreground/50 italic">未割り当て</span>
-                )}
+                }) : <span className="text-xs text-muted-foreground/50 italic">未割り当て</span>}
                 <button
                   onClick={() => openEdit(fixture.id)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-secondary transition-all"
@@ -224,7 +270,7 @@ export default function StorePlan() {
         })}
       </div>
 
-      {/* Change summary */}
+      {/* Change notice */}
       {changedCount > 0 && (
         <div className="rounded-xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3">
           <ArrowRight className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
@@ -235,23 +281,19 @@ export default function StorePlan() {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground/60 italic">
-        ※ 今週の計画は「店舗レイアウト」ページのフロアマップと連動しています。
-      </p>
-
       {/* Edit Dialog */}
       <Dialog open={!!editingId} onOpenChange={open => !open && setEditingId(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-base md:text-lg">
               {editingFixture?.label} — ブランド割り付け編集
             </DialogTitle>
           </DialogHeader>
-          <div className="py-2">
+          <div className="py-2 overflow-y-auto flex-1">
             <p className="text-sm text-muted-foreground mb-4">
-              {editingFixture?.labelJp} に表示するブランドを選択してください（複数可）。
+              {editingFixture?.labelJp} に表示するブランドを選択してください。
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2.5">
               {ALL_BRANDS.map(brand => {
                 const selected = editBrands.includes(brand);
                 return (
@@ -259,25 +301,23 @@ export default function StorePlan() {
                     key={brand}
                     onClick={() => toggleBrand(brand)}
                     data-testid={`brand-toggle-${brand}`}
-                    className={`relative h-12 rounded-lg flex items-center justify-center text-sm font-bold text-white transition-all ${
+                    className={`relative h-14 rounded-xl flex items-center justify-center text-sm font-bold text-white transition-all touch-manipulation ${
                       BRAND_COLORS[brand] || "bg-slate-400"
-                    } ${selected ? "ring-2 ring-offset-2 ring-foreground/30 scale-95" : "opacity-50 hover:opacity-80"}`}
+                    } ${selected ? "ring-2 ring-offset-2 ring-foreground/30 scale-95" : "opacity-50 hover:opacity-80 active:opacity-70"}`}
                   >
                     {brand}
-                    {selected && (
-                      <Check className="absolute top-1 right-1 h-3.5 w-3.5" />
-                    )}
+                    {selected && <Check className="absolute top-1.5 right-1.5 h-4 w-4" />}
                   </button>
                 );
               })}
             </div>
           </div>
-          <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="flex-1" onClick={() => setEditingId(null)}>
-              <X className="h-4 w-4 mr-1" /> キャンセル
+          <div className="flex gap-2.5 pt-3 border-t border-border/40">
+            <Button variant="outline" className="flex-1 h-12 text-base" onClick={() => setEditingId(null)}>
+              <X className="h-4 w-4 mr-1.5" /> キャンセル
             </Button>
-            <Button className="flex-1" onClick={saveEdit} data-testid="button-save-brands">
-              <Check className="h-4 w-4 mr-1" /> 保存
+            <Button className="flex-1 h-12 text-base" onClick={saveEdit} data-testid="button-save-brands">
+              <Check className="h-4 w-4 mr-1.5" /> 保存
             </Button>
           </div>
         </DialogContent>
