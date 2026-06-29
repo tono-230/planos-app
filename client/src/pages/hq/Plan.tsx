@@ -255,6 +255,7 @@ export default function PlanManager() {
   const assignedBrands = new Set(Object.values(thisWeek).filter(Boolean));
   const allBrands = products?.map(p => p.name) ?? Object.keys(BRAND_COLORS);
   const unassignedBrands = allBrands.filter(b => !assignedBrands.has(b));
+  const displayProducts = products ?? Object.keys(BRAND_COLORS).map((name, i) => ({ id: i, name }));
 
   const analyticsBrand = analyticsPos ? (HQ_LAST_WEEK[analyticsPos] || "") : "";
   const analyticsData = analyticsBrand ? BRAND_ANALYTICS[analyticsBrand] : null;
@@ -511,7 +512,7 @@ export default function PlanManager() {
             <DialogTitle>{editingPos} — ブランド割り当て</DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-3 gap-2.5 py-4">
-            {(products ?? []).map(prod => {
+            {displayProducts.map(prod => {
               const color = BRAND_COLORS[prod.name] || "bg-primary";
               const isCurrent = editingPos ? thisWeek[editingPos] === prod.name : false;
               return (

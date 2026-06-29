@@ -85,10 +85,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">ダッシュボード</h1>
-        <p className="mt-2 text-muted-foreground">全店舗の棚割実行状況をリアルタイムで監視します</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">ダッシュボード</h1>
       </div>
 
       {/* Global Filter Bar */}
@@ -147,7 +146,7 @@ export default function Dashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* 1. スキャン店舗数 */}
         <Card
           className="border-none shadow-md shadow-black/5 overflow-hidden relative group cursor-pointer hover:bg-blue-500/[0.02] transition-colors"
@@ -161,7 +160,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black leading-none tabular-nums text-blue-600" data-testid="value-scanned-stores">
+              <span className="text-4xl font-black leading-none tabular-nums text-blue-600" data-testid="value-scanned-stores">
                 {kpi.scanned}
               </span>
               <span className="text-xl font-semibold text-blue-400 leading-none">
@@ -191,7 +190,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="text-5xl font-black leading-none tabular-nums text-emerald-600" data-testid="value-compliance-rate">
+              <span className="text-4xl font-black leading-none tabular-nums text-emerald-600" data-testid="value-compliance-rate">
                 {kpi.complianceRate}
               </span>
               <span className="text-2xl font-bold leading-none text-emerald-500 opacity-70">%</span>
@@ -222,7 +221,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-baseline gap-1.5 flex-wrap">
-              <span className="text-5xl font-black leading-none tabular-nums text-orange-600" data-testid="value-overflow-rate">
+              <span className="text-4xl font-black leading-none tabular-nums text-orange-600" data-testid="value-overflow-rate">
                 {kpi.overflowRate}
               </span>
               <span className="text-2xl font-bold leading-none text-orange-500 opacity-70">%</span>
