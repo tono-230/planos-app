@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useStorePlan, FIXTURES, BRAND_COLORS, ZONE_STYLES } from "@/context/StorePlanContext";
+import { useStorePlan, FIXTURES, BRAND_COLORS, ZONE_STYLES, FIXTURE_SHAPE_CONFIG } from "@/context/StorePlanContext";
 
 const STORE_NAMES: Record<string, string> = {
   "1": "渋谷店", "2": "新宿店", "3": "池袋店", "4": "横浜店",
@@ -23,9 +23,10 @@ const ALL_BRANDS = [
 
 const RFID_SCAN_RESULTS: Record<string, string[]> = {
   "wall-top":   ["AIR", "SUN", "BinB"],
-  "wall-right": ["GB"],
+  "wall-top-2": ["GB"],
+  "wall-right": ["KM"],
   "island-1":   ["JD"],
-  "island-2":   ["KM", "NICHE", "HP"],
+  "island-2":   ["NICHE", "HP"],
   "bottom-1":   ["MOVE", "JUNNI"],
   "bottom-2":   ["ES", "雑貨"],
 };
@@ -121,8 +122,8 @@ function FloorPlanCanvas({
       </div>
 
       <div
-        className="absolute rounded-lg border-2 border-teal-300/60 bg-teal-100/60 flex flex-col items-center justify-center gap-1"
-        style={{ top: "3%", left: "21%", width: "15%", height: "28%" }}
+        className="absolute rounded-xl border-2 border-teal-300/60 bg-teal-100/60 flex flex-col items-center justify-center gap-1"
+        style={{ top: "3%", left: "17%", width: "13%", height: "26%" }}
       >
         <Ruler className="h-[clamp(6px,1vw,10px)] w-[clamp(6px,1vw,10px)] text-teal-600 opacity-80" />
         <span className="text-[clamp(4px,0.7vw,7px)] font-bold text-teal-700 text-center leading-tight tracking-wide">
@@ -148,10 +149,10 @@ function FloorPlanCanvas({
             onClick={() => onSelect(fixture.id)}
             data-testid={`fixture-${mode}-${fixture.id}`}
           >
-            {fixture.id === "wall-top" && <WallCellsH count={6} />}
-            {fixture.id === "wall-right" && <WallCellsV count={5} />}
-            {fixture.id.startsWith("island") && <GridOverlay cols={3} rows={2} />}
-            {fixture.id.startsWith("bottom") && <GridOverlay cols={4} rows={1} />}
+            <GridOverlay
+              cols={FIXTURE_SHAPE_CONFIG[fixture.shapeKey].innerCols}
+              rows={FIXTURE_SHAPE_CONFIG[fixture.shapeKey].innerRows}
+            />
 
             <span className="relative z-10 text-[clamp(5px,0.75vw,9px)] font-bold tracking-wide leading-tight">{fixture.label}</span>
 
