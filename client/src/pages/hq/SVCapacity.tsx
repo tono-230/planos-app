@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sheet";
 import { Search, ArrowUpDown, ArrowUp, ArrowDown, X, Building2 } from "lucide-react";
 import { BASE_STORES as STORES, type StoreBase as Store } from "@/data/stores";
+import { AREA_SV_MASTER, VALID_AREAS } from "@/data/areaMaster";
 
 type SortDirection = "asc" | "desc" | null;
 
@@ -61,15 +62,9 @@ export default function SVCapacity() {
   const [sortDir, setSortDir] = useState<SortDirection>(null);
   const [selected, setSelected] = useState<Store | null>(null);
 
-  const areas = useMemo(() => {
-    const set = new Set(STORES.map(s => s.area).filter(Boolean));
-    return Array.from(set).sort();
-  }, []);
-
   const svs = useMemo(() => {
-    const base = areaFilter === "all" ? STORES : STORES.filter(s => s.area === areaFilter);
-    const set = new Set(base.map(s => s.sv).filter(Boolean));
-    return Array.from(set).sort();
+    if (areaFilter === "all") return Object.values(AREA_SV_MASTER).flat().filter((v, i, a) => a.indexOf(v) === i).sort();
+    return AREA_SV_MASTER[areaFilter] ?? [];
   }, [areaFilter]);
 
   const handleAreaChange = (val: string) => {
@@ -130,7 +125,7 @@ export default function SVCapacity() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">全エリア</SelectItem>
-            {areas.map(a => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+            {VALID_AREAS.map(a => <SelectItem key={a} value={a}>{a}</SelectItem>)}
           </SelectContent>
         </Select>
 
