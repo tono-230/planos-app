@@ -18,41 +18,30 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [countryFilter, setCountryFilter] = useState("all");
   const [areaFilter, setAreaFilter] = useState("all");
   const [svFilter, setSvFilter] = useState("all");
 
-  const allCountries = useMemo(() => {
-    const set = new Set(DASHBOARD_STORES.map(s => s.country).filter(Boolean));
+  const availableAreas = useMemo(() => {
+    const set = new Set(DASHBOARD_STORES.map(s => s.area).filter(Boolean));
     return Array.from(set).sort();
   }, []);
 
-  const availableAreas = useMemo(() => {
-    const base = countryFilter === "all"
-      ? DASHBOARD_STORES
-      : DASHBOARD_STORES.filter(s => s.country === countryFilter);
-    const set = new Set(base.map(s => s.area).filter(Boolean));
-    return Array.from(set).sort();
-  }, [countryFilter]);
-
   const availableSVs = useMemo(() => {
-    let base = countryFilter === "all"
+    const base = areaFilter === "all"
       ? DASHBOARD_STORES
-      : DASHBOARD_STORES.filter(s => s.country === countryFilter);
-    if (areaFilter !== "all") base = base.filter(s => s.area === areaFilter);
+      : DASHBOARD_STORES.filter(s => s.area === areaFilter);
     const set = new Set(base.map(s => s.sv).filter(Boolean));
     return Array.from(set).sort();
-  }, [countryFilter, areaFilter]);
+  }, [areaFilter]);
 
   const filteredStores = useMemo(() => {
     return DASHBOARD_STORES.filter(s => {
       const matchSearch = !searchQuery || s.store_name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchCountry = countryFilter === "all" || s.country === countryFilter;
       const matchArea = areaFilter === "all" || s.area === areaFilter;
       const matchSV = svFilter === "all" || s.sv === svFilter;
-      return matchSearch && matchCountry && matchArea && matchSV;
+      return matchSearch && matchArea && matchSV;
     });
-  }, [searchQuery, countryFilter, areaFilter, svFilter]);
+  }, [searchQuery, areaFilter, svFilter]);
 
   const kpi = useMemo(() => {
     const total = filteredStores.length;
@@ -72,12 +61,6 @@ export default function Dashboard() {
     const overflowSku = Math.round(avgCapacity * avgOverflow / 100);
     return { scanned: scannedCount, total, complianceRate: avgCompliance, overflowRate: avgOverflow, complianceSku, overflowSku };
   }, [filteredStores]);
-
-  const handleCountryChange = (val: string) => {
-    setCountryFilter(val);
-    setAreaFilter("all");
-    setSvFilter("all");
-  };
 
   const handleAreaChange = (val: string) => {
     setAreaFilter(val);
@@ -102,18 +85,6 @@ export default function Dashboard() {
             data-testid="input-store-search"
           />
         </div>
-
-        <Select value={countryFilter} onValueChange={handleCountryChange}>
-          <SelectTrigger className="w-32 h-9 bg-background text-sm" data-testid="select-country">
-            <SelectValue placeholder="全国" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全国</SelectItem>
-            {allCountries.map(c => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         <Select value={areaFilter} onValueChange={handleAreaChange}>
           <SelectTrigger className="w-36 h-9 bg-background text-sm" data-testid="select-area">
