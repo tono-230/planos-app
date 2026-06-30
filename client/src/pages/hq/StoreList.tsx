@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building2, ChevronRight, ScanLine, ChevronDown } from "lucide-react";
@@ -27,11 +27,20 @@ const MOCK_STORES = [
 ];
 
 const ALL_AREAS = Array.from(new Set(MOCK_STORES.map(s => s.area))).sort();
-const ALL_SVS   = Array.from(new Set(MOCK_STORES.map(s => s.sv))).sort();
 
 export default function StoreList() {
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [svFilter,   setSvFilter]   = useState<string>("all");
+
+  const availableSVs = useMemo(() => {
+    const base = areaFilter === "all" ? MOCK_STORES : MOCK_STORES.filter(s => s.area === areaFilter);
+    return Array.from(new Set(base.map(s => s.sv))).sort();
+  }, [areaFilter]);
+
+  const handleAreaChange = useCallback((val: string) => {
+    setAreaFilter(val);
+    setSvFilter("all");
+  }, []);
 
   const filtered = useMemo(() => {
     return MOCK_STORES.filter(s => {
@@ -56,7 +65,7 @@ export default function StoreList() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">エリア</span>
-          <Select value={areaFilter} onValueChange={setAreaFilter}>
+          <Select value={areaFilter} onValueChange={handleAreaChange}>
             <SelectTrigger className="h-8 w-36 text-xs" data-testid="filter-area">
               <SelectValue placeholder="全エリア" />
             </SelectTrigger>
@@ -77,7 +86,7 @@ export default function StoreList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全SV</SelectItem>
-              {ALL_SVS.map(sv => (
+              {availableSVs.map(sv => (
                 <SelectItem key={sv} value={sv}>{sv}</SelectItem>
               ))}
             </SelectContent>

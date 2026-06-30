@@ -67,9 +67,15 @@ export default function SVCapacity() {
   }, []);
 
   const svs = useMemo(() => {
-    const set = new Set(STORES.map(s => s.sv).filter(Boolean));
+    const base = areaFilter === "all" ? STORES : STORES.filter(s => s.area === areaFilter);
+    const set = new Set(base.map(s => s.sv).filter(Boolean));
     return Array.from(set).sort();
-  }, []);
+  }, [areaFilter]);
+
+  const handleAreaChange = (val: string) => {
+    setAreaFilter(val);
+    setSvFilter("all");
+  };
 
   const filtered = useMemo(() => {
     let result = STORES.filter(s => {
@@ -118,7 +124,7 @@ export default function SVCapacity() {
           />
         </div>
 
-        <Select value={areaFilter} onValueChange={setAreaFilter}>
+        <Select value={areaFilter} onValueChange={handleAreaChange}>
           <SelectTrigger className="w-40 h-9 bg-background" data-testid="select-area">
             <SelectValue placeholder="エリア" />
           </SelectTrigger>
