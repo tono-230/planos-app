@@ -100,7 +100,7 @@ function FloorPlanCanvas({
   return (
     <div
       className="relative w-full rounded-2xl border-2 border-slate-300 bg-[#f7f6f2] overflow-hidden shadow-inner"
-      style={{ aspectRatio: "14 / 10" }}
+      style={{ aspectRatio: "7 / 4" }}
       data-testid={`floor-plan-${mode}`}
     >
       <div className="absolute inset-0 opacity-[0.035]" style={{
@@ -113,7 +113,7 @@ function FloorPlanCanvas({
 
       <div
         className="absolute rounded-lg border-2 border-[#b09070]/60 bg-[#d8c8a8]/70 flex flex-col items-center justify-center gap-1"
-        style={{ top: "3%", left: "1%", width: "16%", height: "78%" }}
+        style={{ top: "3%", left: "1%", width: "16%", height: "68%" }}
       >
         <ClipboardList className="h-[clamp(8px,1.4vw,14px)] w-[clamp(8px,1.4vw,14px)] text-[#8a6c4a] opacity-70" />
         <span className="text-[clamp(5px,0.7vw,8px)] font-bold text-[#8a6c4a] text-center leading-tight tracking-wide px-1">
