@@ -13,6 +13,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DASHBOARD_STORES } from "@/data/stores";
+import { AREA_SV_MASTER, VALID_AREAS, ALL_VALID_SVS } from "@/data/areaMaster";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -21,17 +22,9 @@ export default function Dashboard() {
   const [areaFilter, setAreaFilter] = useState("all");
   const [svFilter, setSvFilter] = useState("all");
 
-  const availableAreas = useMemo(() => {
-    const set = new Set(DASHBOARD_STORES.map(s => s.area).filter(Boolean));
-    return Array.from(set).sort();
-  }, []);
-
   const availableSVs = useMemo(() => {
-    const base = areaFilter === "all"
-      ? DASHBOARD_STORES
-      : DASHBOARD_STORES.filter(s => s.area === areaFilter);
-    const set = new Set(base.map(s => s.sv).filter(Boolean));
-    return Array.from(set).sort();
+    if (areaFilter === "all") return ALL_VALID_SVS;
+    return AREA_SV_MASTER[areaFilter] ?? [];
   }, [areaFilter]);
 
   const filteredStores = useMemo(() => {
@@ -92,7 +85,7 @@ export default function Dashboard() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">全エリア</SelectItem>
-            {availableAreas.map(a => (
+            {VALID_AREAS.map(a => (
               <SelectItem key={a} value={a}>{a}</SelectItem>
             ))}
           </SelectContent>

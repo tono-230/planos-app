@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, ChevronRight, ScanLine, ChevronDown } from "lucide-react";
+import { Building2, ChevronRight, ScanLine } from "lucide-react";
 import { Link } from "wouter";
 import {
   Select,
@@ -10,31 +10,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AREA_SV_MASTER, VALID_AREAS } from "@/data/areaMaster";
 
 const MOCK_STORES = [
-  { id: "1", name: "渋谷店",   area: "関東A", sv: "梅津直貴", scanned: true,  compliance: 82, overflow: 12 },
-  { id: "2", name: "新宿店",   area: "関東A", sv: "梅津直貴", scanned: true,  compliance: 65, overflow: 35 },
-  { id: "3", name: "池袋店",   area: "関東A", sv: "慶田盛音夢", scanned: false, compliance: null, overflow: null },
-  { id: "4", name: "横浜店",   area: "関東A", sv: "市村翔太",  scanned: true,  compliance: 91, overflow: 8  },
-  { id: "5", name: "川崎店",   area: "関東A", sv: "市村翔太",  scanned: false, compliance: null, overflow: null },
-  { id: "6", name: "大宮店",   area: "関東B", sv: "慶田盛音夢", scanned: true,  compliance: 73, overflow: 22 },
-  { id: "7", name: "千葉店",   area: "関東B", sv: "大野翔悟",  scanned: false, compliance: null, overflow: null },
-  { id: "8", name: "立川店",   area: "関東B", sv: "大野翔悟",  scanned: true,  compliance: 88, overflow: 15 },
-  { id: "9", name: "北千住店", area: "関東B", sv: "大野翔悟",  scanned: true,  compliance: 76, overflow: 19 },
-  { id: "10", name: "梅田店",  area: "西日本A", sv: "那須未雪", scanned: true,  compliance: 84, overflow: 11 },
-  { id: "11", name: "難波店",  area: "西日本A", sv: "那須未雪", scanned: false, compliance: null, overflow: null },
-  { id: "12", name: "神戸店",  area: "西日本A", sv: "石橋萌花", scanned: true,  compliance: 79, overflow: 24 },
+  { id: "1",  name: "渋谷店",   area: "関東A",  sv: "鈴木和典",  scanned: true,  compliance: 82, overflow: 12 },
+  { id: "2",  name: "新宿店",   area: "関東A",  sv: "鈴木和典",  scanned: true,  compliance: 65, overflow: 35 },
+  { id: "3",  name: "池袋店",   area: "関東A",  sv: "谷口里美",  scanned: false, compliance: null, overflow: null },
+  { id: "4",  name: "横浜店",   area: "関東A",  sv: "谷口里美",  scanned: true,  compliance: 91, overflow: 8  },
+  { id: "5",  name: "川崎店",   area: "関東A",  sv: "吉村奈々",  scanned: false, compliance: null, overflow: null },
+  { id: "6",  name: "大宮店",   area: "関東B",  sv: "渡邉俊也",  scanned: true,  compliance: 73, overflow: 22 },
+  { id: "7",  name: "千葉店",   area: "関東B",  sv: "長優樹",    scanned: false, compliance: null, overflow: null },
+  { id: "8",  name: "立川店",   area: "関東B",  sv: "長優樹",    scanned: true,  compliance: 88, overflow: 15 },
+  { id: "9",  name: "北千住店", area: "関東B",  sv: "小松原徳郎", scanned: true,  compliance: 76, overflow: 19 },
+  { id: "10", name: "梅田店",   area: "西日本A", sv: "那須未雪",  scanned: true,  compliance: 84, overflow: 11 },
+  { id: "11", name: "難波店",   area: "西日本A", sv: "那須未雪",  scanned: false, compliance: null, overflow: null },
+  { id: "12", name: "神戸店",   area: "西日本A", sv: "石橋萌花",  scanned: true,  compliance: 79, overflow: 24 },
 ];
-
-const ALL_AREAS = Array.from(new Set(MOCK_STORES.map(s => s.area))).sort();
 
 export default function StoreList() {
   const [areaFilter, setAreaFilter] = useState<string>("all");
   const [svFilter,   setSvFilter]   = useState<string>("all");
 
   const availableSVs = useMemo(() => {
-    const base = areaFilter === "all" ? MOCK_STORES : MOCK_STORES.filter(s => s.area === areaFilter);
-    return Array.from(new Set(base.map(s => s.sv))).sort();
+    if (areaFilter === "all") return Object.values(AREA_SV_MASTER).flat().filter((v, i, a) => a.indexOf(v) === i).sort();
+    return AREA_SV_MASTER[areaFilter] ?? [];
   }, [areaFilter]);
 
   const handleAreaChange = useCallback((val: string) => {
@@ -71,7 +70,7 @@ export default function StoreList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">全エリア</SelectItem>
-              {ALL_AREAS.map(a => (
+              {VALID_AREAS.map(a => (
                 <SelectItem key={a} value={a}>{a}</SelectItem>
               ))}
             </SelectContent>
