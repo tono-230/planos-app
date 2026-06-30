@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "wouter";
-import { Tag, LayoutGrid, X, Check, Ruler, ClipboardList, ScanLine } from "lucide-react";
+import { Tag, LayoutGrid, X, Check, ClipboardList, ScanLine } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -121,16 +121,6 @@ function FloorPlanCanvas({
         </span>
       </div>
 
-      <div
-        className="absolute rounded-xl border-2 border-teal-300/60 bg-teal-100/60 flex flex-col items-center justify-center gap-1"
-        style={{ top: "3%", left: "17%", width: "13%", height: "26%" }}
-      >
-        <Ruler className="h-[clamp(6px,1vw,10px)] w-[clamp(6px,1vw,10px)] text-teal-600 opacity-80" />
-        <span className="text-[clamp(4px,0.7vw,7px)] font-bold text-teal-700 text-center leading-tight tracking-wide">
-          測定<br />エリア
-        </span>
-      </div>
-
       <div className="absolute bottom-0 left-[38%] right-[38%] flex flex-col items-center gap-0.5 pb-1">
         <div className="text-[clamp(5px,0.6vw,7px)] font-semibold text-slate-400 tracking-widest uppercase">Entrance</div>
         <div className="w-full h-0.5 rounded-full bg-slate-200" />
@@ -140,6 +130,12 @@ function FloorPlanCanvas({
         const isSelected = selectedFixtureId === fixture.id;
         const fixtureBrands = brands[fixture.id] ?? [];
         const plan = planBrands?.[fixture.id] ?? [];
+        const scanAll = mode === "scan"
+          ? [...fixtureBrands, ...plan.filter(b => !fixtureBrands.includes(b))]
+          : [];
+        const displayList = mode === "plan" ? fixtureBrands : scanAll;
+        const visibleBrands = displayList.slice(0, 3);
+        const hiddenCount = displayList.length - 3;
 
         return (
           <button
@@ -157,19 +153,29 @@ function FloorPlanCanvas({
             <span className="relative z-10 text-[clamp(5px,0.75vw,9px)] font-bold tracking-wide leading-tight">{fixture.label}</span>
 
             <div className="relative z-10 flex gap-0.5 flex-wrap justify-center px-0.5">
-              {mode === "plan" ? (
-                fixtureBrands.slice(0, 3).map(b => (
-                  <span
-                    key={b}
-                    className={`inline-block rounded-sm text-white font-bold leading-none ${BRAND_COLORS[b] || "bg-slate-400"}`}
-                    style={{ fontSize: "clamp(4px,0.6vw,7px)", padding: "1px 3px" }}
-                  >
-                    {b}
-                  </span>
-                ))
-              ) : (
-                <>
-                  {fixtureBrands.slice(0, 4).map(b => {
+              {mode === "plan"
+                ? visibleBrands.map(b => (
+                    <span
+                      key={b}
+                      className={`inline-block rounded-sm text-white font-bold leading-none ${BRAND_COLORS[b] || "bg-slate-400"}`}
+                      style={{ fontSize: "clamp(3px,0.55vw,6px)", padding: "1px 2px" }}
+                    >
+                      {b}
+                    </span>
+                  ))
+                : visibleBrands.map(b => {
+                    const isMissing = !fixtureBrands.includes(b);
+                    if (isMissing) {
+                      return (
+                        <span
+                          key={`miss-${b}`}
+                          className="inline-block rounded-sm font-bold leading-none text-slate-400 bg-slate-100 ring-1 ring-slate-300"
+                          style={{ fontSize: "clamp(3px,0.55vw,6px)", padding: "1px 2px" }}
+                        >
+                          {b}
+                        </span>
+                      );
+                    }
                     const status = getBrandStatus(b, plan, fixtureBrands);
                     return (
                       <span
@@ -179,22 +185,20 @@ function FloorPlanCanvas({
                             ? `text-white ${BRAND_COLORS[b] || "bg-slate-400"}`
                             : "text-amber-900 bg-amber-300 ring-1 ring-amber-500"
                         }`}
-                        style={{ fontSize: "clamp(4px,0.6vw,7px)", padding: "1px 3px" }}
+                        style={{ fontSize: "clamp(3px,0.55vw,6px)", padding: "1px 2px" }}
                       >
                         {b}
                       </span>
                     );
-                  })}
-                  {plan.filter(b => !fixtureBrands.includes(b)).slice(0, 2).map(b => (
-                    <span
-                      key={`missing-${b}`}
-                      className="inline-block rounded-sm font-bold leading-none text-slate-400 bg-slate-100 ring-1 ring-slate-300"
-                      style={{ fontSize: "clamp(4px,0.6vw,7px)", padding: "1px 3px" }}
-                    >
-                      {b}
-                    </span>
-                  ))}
-                </>
+                  })
+              }
+              {hiddenCount > 0 && (
+                <span
+                  className="inline-block rounded-sm text-slate-500 bg-slate-200 font-bold leading-none"
+                  style={{ fontSize: "clamp(3px,0.55vw,6px)", padding: "1px 2px" }}
+                >
+                  +{hiddenCount}
+                </span>
               )}
             </div>
           </button>

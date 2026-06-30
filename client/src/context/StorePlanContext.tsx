@@ -55,8 +55,7 @@ export const FIXTURES: Fixture[] = [
     shapeKey: "wall-h",
     description: "上部壁面左の主要展示エリア。最も視認性が高く、ホットブランドを配置します。",
     capacity: 48,
-    // canvas 14:10 → pixel ratio = (width% / height%) × 1.4 = (29/12) × 1.4 ≈ 3.4:1
-    style: { top: "3%", left: "31%", width: "29%", height: "12%" },
+    style: { top: "3%", left: "20%", width: "27%", height: "12%" },
     positions: ["Hot spot A", "Hot spot B"],
   },
   {
@@ -68,8 +67,7 @@ export const FIXTURES: Fixture[] = [
     shapeKey: "wall-h",
     description: "上部壁面右の展示エリア。サブホットブランドを配置します。",
     capacity: 40,
-    // pixel ratio = (27/12) × 1.4 ≈ 3.15:1
-    style: { top: "3%", left: "62%", width: "27%", height: "12%" },
+    style: { top: "3%", left: "52%", width: "27%", height: "12%" },
     positions: ["Sub hot A", "Sub hot B"],
   },
   {
@@ -81,8 +79,7 @@ export const FIXTURES: Fixture[] = [
     shapeKey: "wall-v",
     description: "右側壁面。サブホットブランドのフォーカス展示エリア。",
     capacity: 32,
-    // pixel ratio = (10/50) × 1.4 ≈ 0.28 → 1:3.5
-    style: { top: "17%", right: "1%", width: "10%", height: "50%" },
+    style: { top: "20%", right: "1%", width: "10%", height: "48%" },
     positions: ["定番 A", "定番 B"],
   },
   {
@@ -94,8 +91,7 @@ export const FIXTURES: Fixture[] = [
     shapeKey: "island",
     description: "中央左上島什器。メインブランドの展示エリア。来店客が触れやすいゾーン。",
     capacity: 24,
-    // pixel ratio = (29/24) × 1.4 ≈ 1.69:1
-    style: { top: "17%", left: "17%", width: "29%", height: "24%" },
+    style: { top: "20%", left: "20%", width: "27%", height: "22%" },
     positions: ["Main A", "Main B"],
   },
   {
@@ -107,7 +103,7 @@ export const FIXTURES: Fixture[] = [
     shapeKey: "island",
     description: "中央右上島什器。フィーチャーブランドおよびセレクト展示エリア。",
     capacity: 24,
-    style: { top: "17%", left: "49%", width: "29%", height: "24%" },
+    style: { top: "20%", left: "52%", width: "27%", height: "22%" },
     positions: ["Feature A", "Feature B"],
   },
   {
@@ -119,7 +115,7 @@ export const FIXTURES: Fixture[] = [
     shapeKey: "island",
     description: "中央左下島什器。セール・定番ブランドの展示エリア。",
     capacity: 20,
-    style: { top: "45%", left: "17%", width: "29%", height: "24%" },
+    style: { top: "47%", left: "20%", width: "27%", height: "22%" },
     positions: ["Seasonal A", "Seasonal B"],
   },
   {
@@ -131,7 +127,7 @@ export const FIXTURES: Fixture[] = [
     shapeKey: "island",
     description: "中央右下島什器。シーズナル・セールブランドの展示エリア。",
     capacity: 20,
-    style: { top: "45%", left: "49%", width: "29%", height: "24%" },
+    style: { top: "47%", left: "52%", width: "27%", height: "22%" },
     positions: ["Sale A", "Sale B"],
   },
 ];
