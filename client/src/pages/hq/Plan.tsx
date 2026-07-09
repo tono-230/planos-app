@@ -336,7 +336,7 @@ export default function PlanManager() {
             {GROUPS.map(group => (
               <div key={group} className="grid grid-cols-[auto_1fr_1fr] gap-x-2 mb-2 items-center">
                 <div className="w-20 shrink-0">
-                  <span className="text-[11px] font-semibold text-muted-foreground leading-tight">{group}</span>
+                  <span className="text-sm font-bold text-foreground leading-tight">{group}</span>
                 </div>
                 {VARIANTS.map(v => (
                   <LastWeekCell
@@ -371,7 +371,7 @@ export default function PlanManager() {
             {GROUPS.map(group => (
               <div key={group} className="grid grid-cols-[auto_1fr_1fr] gap-x-2 mb-2 items-center">
                 <div className="w-20 shrink-0">
-                  <span className="text-[11px] font-semibold text-muted-foreground leading-tight">{group}</span>
+                  <span className="text-sm font-bold text-foreground leading-tight">{group}</span>
                 </div>
                 {VARIANTS.map(v => (
                   <ThisWeekCell
